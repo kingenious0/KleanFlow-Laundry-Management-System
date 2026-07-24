@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}User Management | KleanFlow{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Employee &amp; Staff Accounts</h4>
+        <p class="text-muted small mb-0">Manage system access roles, user permissions, and account statuses.</p>
+    </div>
+    {% if current_user.has_role('Administrator') %}
+    <div>
+        <a href="{{ url_for('users.create') }}" class="btn btn-primary fw-semibold rounded-3">
+            <i class="fa-solid fa-user-plus me-2"></i> Add New User
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filters Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" action="{{ url_for('users.index') }}" class="row g-3 align-items-center">
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 bg-light" placeholder="Search by name, email, or phone..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <select name="role" class="form-select bg-light">
+                    <option value="">All Roles</option>
+                    {% for r in roles %}
+                        <option value="{{ r }}" {% if selected_role == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2">
+                <select name="status" class="form-select bg-light">
+                    <option value="">All Statuses</option>
+                    {% for st in statuses %}
+                        <option value="{{ st }}" {% if selected_status == st %}selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Filter</button>
+                <a href="{{ url_for('users.index') }}" class="btn btn-light border rounded-3" title="Reset Filters"><i class="fa-solid fa-rotate"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table Card -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users %}
+                        {% for u in users %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary-subtle text-primary fw-bold rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {{ u.full_name[:2].upper() }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark">{{ u.full_name }}</div>
+                                        <small class="text-muted">{{ u.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if u.role == 'Administrator' %}bg-danger-subtle text-danger{% elif u.role == 'Manager' %}bg-primary-subtle text-primary{% else %}bg-secondary-subtle text-dark{% endif %} px-2 py-1 rounded-2">
+                                    {{ u.role }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ u.phone_number or 'N/A' }}</td>
+                            <td>
+                                {% if u.status == 'Active' %}
+                                    <span class="badge bg-success-subtle text-success px-2 py-1 rounded-2"><i class="fa-solid fa-circle me-1 fs-7"></i> Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded-2"><i class="fa-regular fa-circle me-1 fs-7"></i> Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ u.created_at.strftime('%b %d, %Y') if u.created_at else 'N/A' }}</td>
+                            <td class="text-end pe-4">
+                                {% if current_user.has_role('Administrator') %}
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{{ url_for('users.edit', user_id=u.id) }}" class="btn btn-sm btn-light border rounded-2" title="Edit User">
+                                        <i class="fa-solid fa-pen-to-square text-primary"></i>
+                                    </a>
+
+                                    {% if u.id != current_user.id %}
+                                    <form method="POST" action="{{ url_for('users.toggle_status', user_id=u.id) }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-sm btn-light border rounded-2" title="Toggle Status">
+                                            {% if u.status == 'Active' %}
+                                                <i class="fa-solid fa-ban text-warning"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-check text-success"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+                                    <!-- Delete Modal Trigger -->
+                                    <button type="button" class="btn btn-sm btn-light border rounded-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ u.id }}" title="Delete User">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade text-start" id="deleteModal{{ u.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4 border-0 shadow">
+                                                <div class="modal-header border-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-danger">Confirm User Deletion</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body py-3">
+                                                    Are you sure you want to permanently delete the account for <strong>{{ u.full_name }}</strong> ({{ u.email }})?
+                                                    This action cannot be undone.
+                                                </div>
+                                                <div class="modal-footer border-0 pt-0">
+                                                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                    <form method="POST" action="{{ url_for('users.delete', user_id=u.id) }}">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <button type="submit" class="btn btn-danger rounded-3">Delete User</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <span class="text-muted small">View Only</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-users-slash fs-1 d-block mb-3 text-secondary"></i>
+                                No users found matching your filter criteria.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        {% if pagination and pagination.pages > 1 %}
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
+            <small class="text-muted">Showing {{ pagination.items|length }} of {{ pagination.total }} users</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('users.index', page=pagination.prev_num, search=search, role=selected_role, status=selected_status) }}">Previous</a>
+                    </li>
+                    {% for p in pagination.iter_pages() %}
+                        {% if p %}
+                            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('users.index', page=p, search=search, role=selected_role, status=selected_status) }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('users.index', page=pagination.next_num, search=search, role=selected_role, status=selected_status) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

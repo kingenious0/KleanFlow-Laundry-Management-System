@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Create User | KleanFlow{% endblock %}
+{% block page_title %}Create User Account{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold mb-0">Add New User</h5>
+                    <a href="{{ url_for('users.index') }}" class="btn btn-light btn-sm border rounded-3">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Back to Users
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('users.create') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="full_name" class="form-label small fw-semibold text-muted">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ data.full_name if data else '' }}" placeholder="John Doe" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="email" class="form-label small fw-semibold text-muted">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ data.email if data else '' }}" placeholder="johndoe@kleanflow.com" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="phone_number" class="form-label small fw-semibold text-muted">Phone Number</label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ data.phone_number if data else '' }}" placeholder="024XXXXXXX">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="role" class="form-label small fw-semibold text-muted">User Role <span class="text-danger">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                {% for r in roles %}
+                                    <option value="{{ r }}" {% if data and data.role == r %}selected{% elif r == 'Laundry Staff' %}selected{% endif %}>{{ r }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="status" class="form-label small fw-semibold text-muted">Account Status <span class="text-danger">*</span></label>
+                            <select class="form-select" id="status" name="status" required>
+                                {% for st in statuses %}
+                                    <option value="{{ st }}" {% if data and data.status == st %}selected{% elif st == 'Active' %}selected{% endif %}>{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="password" class="form-label small fw-semibold text-muted">Initial Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                        </div>
+                        <div class="col-12">
+                            <div class="bg-light rounded-3 p-3 text-muted small">
+                                <i class="fa-solid fa-circle-info text-primary me-2"></i>
+                                <strong>Password Policy Requirements:</strong> At least 8 characters, with uppercase, lowercase, numbers, and special characters.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{{ url_for('users.index') }}" class="btn btn-light border rounded-3 px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Register Customer | KleanFlow{% endblock %}
+{% block page_title %}Register New Customer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold mb-0">Register New Customer</h5>
+                    <a href="{{ url_for('customers.index') }}" class="btn btn-light btn-sm border rounded-3">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Back to Directory
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('customers.create') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="full_name" class="form-label small fw-semibold text-muted">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ data.full_name if data else '' }}" placeholder="Customer full name" required autofocus>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="phone_number" class="form-label small fw-semibold text-muted">Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ data.phone_number if data else '' }}" placeholder="e.g. 024XXXXXXX" required>
+                            <small class="text-muted fs-7">Must be unique per customer record.</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="email" class="form-label small fw-semibold text-muted">Email Address (Optional)</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ data.email if data else '' }}" placeholder="customer@example.com">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="customer_code" class="form-label small fw-semibold text-muted">Customer Code</label>
+                            <input type="text" class="form-control bg-light" id="customer_code" name="customer_code" placeholder="Auto-generated on save" readonly>
+                            <small class="text-muted fs-7">Code generated sequentially (e.g. CUST-0001).</small>
+                        </div>
+                        <div class="col-12">
+                            <label for="address" class="form-label small fw-semibold text-muted">Physical Address / Pickup Location <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="address" name="address" rows="3" placeholder="Residential or office pickup location address details..." required>{{ data.address if data else '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{{ url_for('customers.index') }}" class="btn btn-light border rounded-3 px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">Save &amp; Register Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

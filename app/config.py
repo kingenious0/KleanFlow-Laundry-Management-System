@@ -33,7 +33,7 @@ class Config:
 
     # Business Defaults
     BUSINESS_NAME = os.getenv('BUSINESS_NAME', 'KleanFlow Laundry Services')
-    CURRENCY = os.getenv('CURRENCY', 'USD')
+    CURRENCY = os.getenv('CURRENCY', 'GHS')
     TAX_RATE = float(os.getenv('TAX_RATE', 0.00))
 
     # File Upload Config

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}KleanFlow Laundry Management System{% endblock %}</title>
 
     <!-- Google Fonts -->
@@ -32,13 +33,13 @@
         <div class="sidebar-body">
             <ul class="nav flex-column sidebar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ url_for('dashboard.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
                         <i class="fa-solid fa-chart-pie me-3"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'customers' %}active{% endif %}" href="{{ url_for('customers.index') }}">
                         <i class="fa-solid fa-users me-3"></i>
                         <span>Customers</span>
                     </a>
@@ -85,11 +86,12 @@
                         <span>Reports</span>
                     </a>
                 </li>
+                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
                 <li class="nav-item mt-3">
                     <small class="text-uppercase text-muted px-3 fw-semibold fs-7">Administration</small>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'users' %}active{% endif %}" href="{{ url_for('users.index') }}">
                         <i class="fa-solid fa-user-gear me-3"></i>
                         <span>User Management</span>
                     </a>
@@ -100,6 +102,7 @@
                         <span>Settings</span>
                     </a>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </aside>
@@ -136,18 +139,21 @@
                         </div>
                         <div class="d-none d-md-block text-start">
                             <div class="fw-semibold small lh-1">
-                                {% if current_user.is_authenticated %}{{ current_user.full_name }}{% else %}Guest Admin{% endif %}
+                                {% if current_user.is_authenticated %}{{ current_user.full_name }}{% else %}Guest User{% endif %}
                             </div>
                             <small class="text-muted fs-7">
-                                {% if current_user.is_authenticated %}{{ current_user.role }}{% else %}Administrator{% endif %}
+                                {% if current_user.is_authenticated %}{{ current_user.role }}{% else %}Guest{% endif %}
                             </small>
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user me-2"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-2"></i> Settings</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="fa-regular fa-user me-2"></i> Profile &amp; Password</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.login') }}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -159,7 +165,7 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show mb-3" role="alert">
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>

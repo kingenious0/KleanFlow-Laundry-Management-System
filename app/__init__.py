@@ -3,17 +3,18 @@ Application Factory for KleanFlow Laundry Management System.
 """
 
 import os
+import click
 from flask import Flask, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from app.config import Config, config_by_name
-from app.extensions import db, migrate, login_manager
+from app.extensions import db, migrate, login_manager, csrf
 
 
 def create_app(config_name=None):
     """
     Flask Application Factory.
-    Initializes configuration, extensions, blueprints, error handlers, and login user loader.
+    Initializes configuration, extensions, blueprints, error handlers, and CLI commands.
     """
     app = Flask(__name__)
 
@@ -48,6 +49,7 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Register Flask-Login user loader
     from app.models import User
@@ -59,9 +61,13 @@ def create_app(config_name=None):
     # Register Blueprints
     from app.dashboard import dashboard_bp
     from app.auth import auth_bp
+    from app.users import users_bp
+    from app.customers import customers_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(users_bp)
+    app.register_blueprint(customers_bp)
 
     # Register Error Handlers
     @app.errorhandler(404)
@@ -72,5 +78,26 @@ def create_app(config_name=None):
     def internal_error(error):
         db.session.rollback()
         return render_template('500.html'), 500
+
+    # Register CLI seed command
+    @app.cli.command("seed-admin")
+    def seed_admin():
+        """Seeds default administrator account."""
+        admin_email = "admin@kleanflow.com"
+        existing_admin = User.query.filter_by(email=admin_email).first()
+        if not existing_admin:
+            admin = User(
+                full_name="System Administrator",
+                email=admin_email,
+                phone_number="0200000000",
+                role="Administrator",
+                status="Active"
+            )
+            admin.set_password("Admin123!")
+            db.session.add(admin)
+            db.session.commit()
+            click.echo(f"Successfully created default administrator account: {admin_email} / Admin123!")
+        else:
+            click.echo(f"Administrator account '{admin_email}' already exists.")
 
     return app

@@ -13,7 +13,7 @@ class Setting(db.Model):
     business_phone = db.Column(db.String(20), nullable=True)
     business_email = db.Column(db.String(120), nullable=True)
     receipt_prefix = db.Column(db.String(20), nullable=True, default='RCP-')
-    currency = db.Column(db.String(10), nullable=True, default='USD')
+    currency = db.Column(db.String(10), nullable=True, default='GHS')
     tax_rate = db.Column(db.Numeric(5, 2), nullable=True, default=0.00)
 
     def __repr__(self):

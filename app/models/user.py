@@ -36,6 +36,14 @@ class User(UserMixin, db.Model):
         """Verifies password against stored hash."""
         return check_password_hash(self.password_hash, password)
 
+    def is_active_user(self):
+        """Returns True if user status is Active."""
+        return self.status == 'Active'
+
+    def has_role(self, *roles):
+        """Returns True if user role is within specified roles."""
+        return self.role in roles
+
     def is_admin(self):
         return self.role == 'Administrator'
 
@@ -44,3 +52,4 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User id={self.id} email='{self.email}' role='{self.role}'>"
+

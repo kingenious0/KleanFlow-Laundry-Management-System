@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Profile | KleanFlow{% endblock %}
+{% block page_title %}Customer Profile{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Customer Info Card -->
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-2 fs-7 rounded-pill">
+                    {{ customer.customer_code }}
+                </span>
+                <a href="{{ url_for('customers.edit', customer_id=customer.id) }}" class="btn btn-sm btn-light border rounded-3">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> Edit Details
+                </a>
+            </div>
+
+            <div class="text-center my-3">
+                <div class="avatar bg-primary text-white fs-3 fw-bold rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                    {{ customer.full_name[:2].upper() }}
+                </div>
+                <h4 class="fw-bold mb-1">{{ customer.full_name }}</h4>
+                <p class="text-muted small mb-0"><i class="fa-solid fa-phone me-1 text-primary"></i> {{ customer.phone_number }}</p>
+                {% if customer.email %}
+                    <small class="text-muted"><i class="fa-regular fa-envelope me-1"></i> {{ customer.email }}</small>
+                {% endif %}
+            </div>
+
+            <hr class="my-3">
+
+            <div class="small">
+                <h6 class="fw-semibold text-dark mb-2"><i class="fa-solid fa-location-dot text-danger me-2"></i>Pickup &amp; Delivery Address</h6>
+                <p class="text-muted bg-light p-3 rounded-3 mb-0">{{ customer.address or 'No address recorded.' }}</p>
+            </div>
+
+            <div class="mt-auto pt-3 border-top text-muted fs-7">
+                Registered on: {{ customer.created_at.strftime('%B %d, %Y') if customer.created_at else 'N/A' }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics & History Tabs -->
+    <div class="col-12 col-lg-8">
+        <!-- Stat Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-primary-subtle text-primary rounded-3 p-3 me-3">
+                            <i class="fa-solid fa-basket-shopping fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Total Orders</h6>
+                            <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape bg-success-subtle text-success rounded-3 p-3 me-3">
+                            <i class="fa-solid fa-money-bill-wave fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Total Spent</h6>
+                            <h3 class="fw-bold mb-0">GH₵{{ "%.2f"|format(total_spent) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders & Activity History Card -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold mb-0">Order &amp; Service History</h5>
+                    <small class="text-muted">{{ orders|length }} total transactions</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Order Ref</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th class="text-end pe-4">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if orders %}
+                                {% for ord in orders %}
+                                <tr>
+                                    <td class="ps-4 font-monospace fw-semibold">{{ ord.order_number }}</td>
+                                    <td class="small text-muted">{{ ord.order_date.strftime('%b %d, %Y') if ord.order_date else '' }}</td>
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info px-2 py-1 rounded-2">{{ ord.order_status }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning-subtle text-dark px-2 py-1 rounded-2">{{ ord.payment_status }}</span>
+                                    </td>
+                                    <td class="text-end pe-4 fw-semibold">GH₵{{ "%.2f"|format(ord.total_amount) }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="fa-solid fa-receipt fs-1 d-block mb-3 text-secondary"></i>
+                                        No order history recorded for this customer yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
