@@ -45,7 +45,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'services' %}active{% endif %}" href="{{ url_for('services.index') }}">
                         <i class="fa-solid fa-shirt me-3"></i>
                         <span>Services</span>
                     </a>

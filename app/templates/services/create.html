@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Service | KleanFlow{% endblock %}
+{% block page_title %}Add Laundry Service{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Create Laundry Service</h4>
+                <p class="text-muted small mb-0">Add a new service offering and set its unit price in Ghanaian Cedi (GH₵).</p>
+            </div>
+            <a href="{{ url_for('services.index') }}" class="btn btn-light border rounded-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Services
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('services.create') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="row g-4">
+                        <div class="col-12 col-md-8">
+                            <label for="service_name" class="form-label fw-semibold">Service Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg bg-light" id="service_name" name="service_name" placeholder="e.g. Wash & Fold (per kg)" value="{{ data.service_name if data else '' }}" required>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="price" class="form-label fw-semibold">Price (GH₵) <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light fw-bold text-success">GH₵</span>
+                                <input type="number" step="0.50" min="0" class="form-control form-control-lg bg-light" id="price" name="price" placeholder="0.00" value="{{ data.price if data else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="category" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg bg-light" id="category" name="category" onchange="toggleCustomCategory(this)" required>
+                                <option value="Wash & Fold" {% if data and data.category == 'Wash & Fold' %}selected{% endif %}>Wash & Fold</option>
+                                <option value="Dry Cleaning" {% if data and data.category == 'Dry Cleaning' %}selected{% endif %}>Dry Cleaning</option>
+                                <option value="Ironing & Pressing" {% if data and data.category == 'Ironing & Pressing' %}selected{% endif %}>Ironing & Pressing</option>
+                                <option value="Specialty & Repairs" {% if data and data.category == 'Specialty & Repairs' %}selected{% endif %}>Specialty & Repairs</option>
+                                <option value="Pickup & Delivery" {% if data and data.category == 'Pickup & Delivery' %}selected{% endif %}>Pickup & Delivery</option>
+                                {% for cat in categories %}
+                                    {% if cat not in ['Wash & Fold', 'Dry Cleaning', 'Ironing & Pressing', 'Specialty & Repairs', 'Pickup & Delivery'] %}
+                                        <option value="{{ cat }}" {% if data and data.category == cat %}selected{% endif %}>{{ cat }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                <option value="NEW">+ Add Custom Category...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 d-none" id="customCategoryDiv">
+                            <label for="custom_category" class="form-label fw-semibold">New Category Name</label>
+                            <input type="text" class="form-control form-control-lg bg-light" id="custom_category" name="custom_category" placeholder="Enter new category name..." value="{{ data.custom_category if data else '' }}">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="status" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg bg-light" id="status" name="status" required>
+                                <option value="Active" {% if not data or data.status == 'Active' %}selected{% endif %}>Active (Available for orders)</option>
+                                <option value="Inactive" {% if data and data.status == 'Inactive' %}selected{% endif %}>Inactive (Disabled)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-semibold">Service Description</label>
+                            <textarea class="form-control bg-light" id="description" name="description" rows="3" placeholder="Provide details about turn-around time, garment care instructions, or specifications...">{{ data.description if data else '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('services.index') }}" class="btn btn-light btn-lg rounded-3 px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5 fw-semibold">Save Service</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCustomCategory(select) {
+    const customDiv = document.getElementById('customCategoryDiv');
+    if (select.value === 'NEW') {
+        customDiv.classList.remove('d-none');
+        document.getElementById('custom_category').focus();
+    } else {
+        customDiv.classList.add('d-none');
+    }
+}
+document.addEventListener("DOMContentLoaded", function() {
+    const catSelect = document.getElementById('category');
+    if (catSelect) toggleCustomCategory(catSelect);
+});
+</script>
+{% endblock %}

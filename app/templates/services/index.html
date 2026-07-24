@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Laundry Services | KleanFlow{% endblock %}
+{% block page_title %}Laundry Services & Pricing{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Laundry Services & Pricing</h4>
+        <p class="text-muted small mb-0">Manage service offerings, pricing in Ghanaian Cedi (GH₵), categories, and availability.</p>
+    </div>
+    {% if current_user.has_role('Administrator', 'Manager') %}
+    <div>
+        <a href="{{ url_for('services.create') }}" class="btn btn-primary fw-semibold rounded-3">
+            <i class="fa-solid fa-plus me-2"></i> Add New Service
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" action="{{ url_for('services.index') }}" class="row g-3 align-items-center">
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 bg-light" placeholder="Search service name, category, or description..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <select name="category" class="form-select bg-light">
+                    <option value="All" {% if selected_category == 'All' or not selected_category %}selected{% endif %}>All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <select name="status" class="form-select bg-light">
+                    <option value="All" {% if selected_status == 'All' or not selected_status %}selected{% endif %}>All Statuses</option>
+                    <option value="Active" {% if selected_status == 'Active' %}selected{% endif %}>Active Only</option>
+                    <option value="Inactive" {% if selected_status == 'Inactive' %}selected{% endif %}>Inactive Only</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Filter</button>
+                <a href="{{ url_for('services.index') }}" class="btn btn-light border rounded-3" title="Reset Filters"><i class="fa-solid fa-rotate"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Service List Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Service Name</th>
+                        <th>Category</th>
+                        <th>Price (GH₵)</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if services %}
+                        {% for s in services %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-info-subtle text-info fw-bold rounded-3 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fa-solid fa-jug-detergent fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-semibold text-dark d-block mb-0">{{ s.service_name }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1 fs-7">
+                                    <i class="fa-solid fa-tag text-muted me-1"></i> {{ s.category or 'General' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success fs-6">
+                                    GH₵ {{ "%.2f"|format(s.price) }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if s.status == 'Active' %}
+                                    <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Active
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded-pill">
+                                        <i class="fa-solid fa-circle-xmark me-1"></i> Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small text-truncate" style="max-width: 260px;" title="{{ s.description or '' }}">
+                                {{ s.description or 'No description provided.' }}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex gap-2">
+                                    {% if current_user.has_role('Administrator', 'Manager') %}
+                                        <!-- Toggle Status Form -->
+                                        <form method="POST" action="{{ url_for('services.toggle_status', service_id=s.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            {% if s.status == 'Active' %}
+                                                <button type="submit" class="btn btn-sm btn-light border text-warning rounded-2" title="Disable Service">
+                                                    <i class="fa-solid fa-ban"></i> Disable
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-sm btn-light border text-success rounded-2" title="Enable Service">
+                                                    <i class="fa-solid fa-check"></i> Enable
+                                                </button>
+                                            {% endif %}
+                                        </form>
+
+                                        <!-- Edit Button -->
+                                        <a href="{{ url_for('services.edit', service_id=s.id) }}" class="btn btn-sm btn-light border rounded-2" title="Edit Service">
+                                            <i class="fa-solid fa-pen-to-square text-secondary"></i>
+                                        </a>
+
+                                        <!-- Delete Modal Trigger -->
+                                        <button type="button" class="btn btn-sm btn-light border rounded-2 text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ s.id }}" title="Delete Service">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <div class="modal fade text-start" id="deleteModal{{ s.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content rounded-4 border-0 shadow">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h5 class="modal-title fw-bold text-danger">Confirm Removal</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body py-3">
+                                                        Are you sure you want to remove service <strong>{{ s.service_name }}</strong> (GH₵ {{ "%.2f"|format(s.price) }})?
+                                                        Past orders using this service will not be modified.
+                                                    </div>
+                                                    <div class="modal-footer border-0 pt-0">
+                                                        <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                        <form method="POST" action="{{ url_for('services.delete', service_id=s.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                            <button type="submit" class="btn btn-danger rounded-3">Remove Service</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted small">View Only</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-soap fs-1 d-block mb-3 text-secondary"></i>
+                                No laundry services found matching your criteria.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        {% if pagination and pagination.pages > 1 %}
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
+            <small class="text-muted">Showing {{ pagination.items|length }} of {{ pagination.total }} services</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('services.index', page=pagination.prev_num, search=search, category=selected_category, status=selected_status) }}">Previous</a>
+                    </li>
+                    {% for p in pagination.iter_pages() %}
+                        {% if p %}
+                            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('services.index', page=p, search=search, category=selected_category, status=selected_status) }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('services.index', page=pagination.next_num, search=search, category=selected_category, status=selected_status) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
