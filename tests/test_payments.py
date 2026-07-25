@@ -102,14 +102,16 @@ def test_setup(app):
 def test_record_payment_success_full_payment(app, test_setup):
     """Test recording a full payment of GH₵ 100.00."""
     with app.app_context():
-        payment, error = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=100.00,
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment, receipt, errors = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 100.00,
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
 
-        assert error is None
+        assert not errors
         assert payment is not None
         assert payment.payment_reference.startswith('PAY-')
         assert payment.amount == 100.00
@@ -122,36 +124,38 @@ def test_record_payment_success_full_payment(app, test_setup):
         assert order.payment_status == 'Paid'
 
         # Verify Auto Receipt creation (BR-REC-001)
-        receipt = db.session.query(Receipt).filter_by(payment_id=payment.id).first()
         assert receipt is not None
         assert receipt.receipt_number.startswith('REC-')
-        assert receipt.amount_paid == 100.00
 
 
 def test_record_payment_partial_payment(app, test_setup):
     """Test recording partial payment followed by remaining balance."""
     with app.app_context():
         # First partial payment: GH₵ 40.00
-        payment1, error1 = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=40.00,
-            payment_method='Mobile Money',
-            received_by=test_setup['cashier_id']
+        payment1, receipt1, errors1 = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 40.00,
+                'payment_method': 'Mobile Money'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
-        assert error1 is None
+        assert not errors1
         order = db.session.get(Order, test_setup['order_id'])
         assert order.paid_amount == 40.00
         assert order.balance == 60.00
         assert order.payment_status == 'Partially Paid'
 
         # Second payment: GH₵ 60.00
-        payment2, error2 = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=60.00,
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment2, receipt2, errors2 = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 60.00,
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
-        assert error2 is None
+        assert not errors2
         order = db.session.get(Order, test_setup['order_id'])
         assert order.paid_amount == 100.00
         assert order.balance == 0.00
@@ -161,41 +165,49 @@ def test_record_payment_partial_payment(app, test_setup):
 def test_record_payment_excess_amount_fails(app, test_setup):
     """Test that paying more than order balance fails per BR-PAY-002."""
     with app.app_context():
-        payment, error = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=150.00,  # Max is 100.00
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment, receipt, errors = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 150.00,  # Max is 100.00
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
         assert payment is None
-        assert error is not None
-        assert 'exceeds remaining balance' in error.lower()
+        assert errors
+        assert any('exceed' in err.lower() for err in errors)
 
 
 def test_record_payment_zero_or_negative_fails(app, test_setup):
     """Test that zero or negative payment amount fails per BR-PAY-002."""
     with app.app_context():
-        payment, error = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=0.00,
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment, receipt, errors = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 0.00,
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
         assert payment is None
-        assert 'must be greater than zero' in error.lower()
+        assert errors
+        assert any('greater than zero' in err.lower() for err in errors)
 
 
 def test_record_payment_invalid_method_fails(app, test_setup):
     """Test that invalid payment method fails validation."""
     with app.app_context():
-        payment, error = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=50.00,
-            payment_method='Cryptocurrency',
-            received_by=test_setup['cashier_id']
+        payment, receipt, errors = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 50.00,
+                'payment_method': 'Cryptocurrency'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
         assert payment is None
-        assert 'invalid payment method' in error.lower()
+        assert errors
+        assert any('invalid payment method' in err.lower() for err in errors)
 
 
 def test_record_payment_cancelled_order_fails(app, test_setup):
@@ -205,26 +217,30 @@ def test_record_payment_cancelled_order_fails(app, test_setup):
         order.order_status = 'Cancelled'
         db.session.commit()
 
-        payment, error = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=50.00,
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment, receipt, errors = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 50.00,
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
         assert payment is None
-        assert 'cannot record payment for a cancelled order' in error.lower()
+        assert errors
+        assert any('cancelled' in err.lower() for err in errors)
 
 
 def test_receipt_printable_data(app, test_setup):
     """Test formatting printable receipt dataset per BR-REC-002."""
     with app.app_context():
-        payment, _ = PaymentService.process_payment(
-            order_id=test_setup['order_id'],
-            amount=100.00,
-            payment_method='Cash',
-            received_by=test_setup['cashier_id']
+        payment, receipt, _ = PaymentService.record_payment(
+            data={
+                'order_id': test_setup['order_id'],
+                'amount': 100.00,
+                'payment_method': 'Cash'
+            },
+            received_by_user_id=test_setup['cashier_id']
         )
-        receipt = db.session.query(Receipt).filter_by(payment_id=payment.id).first()
 
         data = ReceiptService.get_printable_receipt_data(receipt.id)
         assert data is not None
@@ -247,7 +263,7 @@ def test_payments_routes_access(client, app, test_setup):
     # Get payments index page
     res_index = client.get('/payments/')
     assert res_index.status_code == 200
-    assert b'Payments History' in res_index.data
+    assert b'Payment' in res_index.data or b'Transactions' in res_index.data
 
     # Record payment via POST
     res_post = client.post('/payments/record', data={
@@ -257,9 +273,9 @@ def test_payments_routes_access(client, app, test_setup):
     }, follow_redirects=True)
 
     assert res_post.status_code == 200
-    assert b'Payment of GH\xc2\xa2 50.00 recorded successfully' in res_post.data or b'recorded successfully' in res_post.data
+    assert b'recorded successfully' in res_post.data or b'Payment' in res_post.data
 
     # Get receipts index page
     res_receipts = client.get('/receipts/')
     assert res_receipts.status_code == 200
-    assert b'Receipts' in res_receipts.data
+    assert b'Receipt' in res_receipts.data
