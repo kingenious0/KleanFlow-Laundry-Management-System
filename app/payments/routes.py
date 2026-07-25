@@ -40,12 +40,24 @@ def index():
     )
 
 
+from app.models.order import Order
+
+
 @payments_bp.route('/record', methods=['GET', 'POST'])
 @roles_required('Administrator', 'Manager', 'Cashier')
 def record():
     """Renders payment recording form and processes payment transaction."""
+    unpaid_orders = Order.query.filter(
+        Order.is_deleted == False,
+        Order.order_status != 'Cancelled',
+        Order.payment_status.in_(['Unpaid', 'Partially Paid'])
+    ).order_by(Order.created_at.desc()).all()
+
     preselected_order_id = request.args.get('order_id', type=int)
     preselected_order = OrderService.get_order_by_id(preselected_order_id) if preselected_order_id else None
+
+    if not preselected_order and unpaid_orders:
+        preselected_order = unpaid_orders[0]
 
     if request.method == 'POST':
         data = {
@@ -62,12 +74,13 @@ def record():
             for err in errors:
                 flash(err, 'danger')
             target_order = OrderService.get_order_by_id(data.get('order_id')) if data.get('order_id') else preselected_order
-            return render_template('payments/record.html', preselected_order=target_order, data=data)
+            return render_template('payments/record.html', preselected_order=target_order, unpaid_orders=unpaid_orders, data=data)
 
         flash(f"Payment of GH₵ {created_payment.amount:.2f} recorded successfully for Order #{created_payment.order.order_number}!", "success")
         return redirect(url_for('receipts.show', receipt_id=created_receipt.id))
 
-    return render_template('payments/record.html', preselected_order=preselected_order)
+    return render_template('payments/record.html', preselected_order=preselected_order, unpaid_orders=unpaid_orders)
+
 
 
 @payments_bp.route('/<int:payment_id>', methods=['GET'])

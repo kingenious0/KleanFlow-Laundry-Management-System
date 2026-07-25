@@ -24,26 +24,36 @@
                     <div class="row g-4">
                         <!-- Order Details Section -->
                         <div class="col-12">
-                            <label for="order_id" class="form-label fw-semibold">Select Order <span class="text-danger">*</span></label>
-                            {% if preselected_order %}
-                                <input type="hidden" name="order_id" value="{{ preselected_order.id }}">
-                                <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <h6 class="fw-bold font-monospace text-primary mb-1">Order #{{ preselected_order.order_number }}</h6>
-                                        <small class="text-muted"><i class="fa-solid fa-user me-1"></i> {{ preselected_order.customer.full_name }} ({{ preselected_order.customer.phone_number }})</small>
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="badge bg-warning-subtle text-dark border d-block mb-1">Balance: GH₵ {{ "%.2f"|format(preselected_order.balance) }}</span>
-                                        <small class="text-muted">Total: GH₵ {{ "%.2f"|format(preselected_order.total_amount) }}</small>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <select name="order_id" id="order_id" class="form-select form-select-lg bg-light" required>
-                                    <option value="">-- Select Unpaid / Partially Paid Order --</option>
-                                    <!-- Options populated via backend or search -->
+                            <label for="order_id_select" class="form-label fw-semibold">Select Laundry Order <span class="text-danger">*</span></label>
+                            {% if unpaid_orders %}
+                                <select id="order_id_select" name="order_id" class="form-select form-select-lg bg-light" onchange="window.location.href='{{ url_for('payments.record') }}?order_id=' + this.value" required>
+                                    {% for ord in unpaid_orders %}
+                                        <option value="{{ ord.id }}" {% if preselected_order and preselected_order.id == ord.id %}selected{% endif %}>
+                                            Order #{{ ord.order_number }} — {{ ord.customer.full_name }} (Balance: GH₵ {{ "%.2f"|format(ord.balance) }})
+                                        </option>
+                                    {% endfor %}
                                 </select>
+                            {% else %}
+                                <div class="alert alert-info rounded-3 mb-0">
+                                    <i class="fa-solid fa-circle-info me-2"></i> There are currently no unpaid or partially paid orders requiring payment.
+                                </div>
                             {% endif %}
                         </div>
+
+                        {% if preselected_order %}
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold font-monospace text-primary mb-1">Order #{{ preselected_order.order_number }}</h6>
+                                    <small class="text-muted"><i class="fa-solid fa-user me-1"></i> {{ preselected_order.customer.full_name }} ({{ preselected_order.customer.phone_number }})</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning-subtle text-dark border d-block mb-1">Balance Due: GH₵ {{ "%.2f"|format(preselected_order.balance) }}</span>
+                                    <small class="text-muted">Order Total: GH₵ {{ "%.2f"|format(preselected_order.total_amount) }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         {% if preselected_order %}
                         <!-- Payment Amount Input -->
