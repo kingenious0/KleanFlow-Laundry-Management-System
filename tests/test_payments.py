@@ -40,11 +40,11 @@ def test_setup(app):
     with app.app_context():
         # Create Cashier User
         cashier = User(
-            username='testcashier',
-            email='cashier@kleanflow.com',
             full_name='Test Cashier',
+            email='cashier@kleanflow.com',
+            phone_number='0240000099',
             role='Cashier',
-            is_active=True
+            status='Active'
         )
         cashier.set_password('Password123!')
 
