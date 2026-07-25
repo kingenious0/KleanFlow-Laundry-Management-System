@@ -1,0 +1,44 @@
+[Unit]
+Description=KleanFlow Laundry Management System (Gunicorn WSGI)
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+# Replace 'ubuntu' with your actual service user
+User=ubuntu
+Group=www-data
+
+# Absolute path to the project directory
+WorkingDirectory=/var/www/kleanflow
+
+# Activate the virtual environment and start Gunicorn
+ExecStart=/var/www/kleanflow/venv/bin/gunicorn \
+    --config /var/www/kleanflow/gunicorn.conf.py \
+    run:app
+
+# Graceful reload on HUP signal (zero-downtime deploys)
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Use kill timeout to allow graceful shutdown
+KillMode=mixed
+TimeoutStopSec=30
+
+# Restart policy
+Restart=always
+RestartSec=5
+
+# Environment loading
+EnvironmentFile=/var/www/kleanflow/.env
+
+# Logging (journald captures stdout/stderr)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kleanflow
+
+# Security hardening
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
