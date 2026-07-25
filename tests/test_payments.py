@@ -242,7 +242,7 @@ def test_receipt_printable_data(app, test_setup):
             received_by_user_id=test_setup['cashier_id']
         )
 
-        data = ReceiptService.get_printable_receipt_data(receipt.id)
+        data = ReceiptService.get_receipt_printable_data(receipt.id)
         assert data is not None
         assert data['receipt_number'] == receipt.receipt_number
         assert data['customer']['name'] == 'Kofi Mensah'

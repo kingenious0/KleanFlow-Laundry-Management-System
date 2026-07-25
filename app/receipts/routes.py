@@ -39,7 +39,7 @@ def show(receipt_id):
         flash("Receipt record not found.", "danger")
         return redirect(url_for('receipts.index'))
 
-    return render_template('receipts/show.html', data=receipt_data)
+    return render_template('receipts/show.html', receipt_data=receipt_data, data=receipt_data)
 
 
 @receipts_bp.route('/<int:receipt_id>/print', methods=['GET'])
@@ -51,4 +51,4 @@ def print_receipt(receipt_id):
         flash("Receipt record not found.", "danger")
         return redirect(url_for('receipts.index'))
 
-    return render_template('receipts/print.html', data=receipt_data)
+    return render_template('receipts/print.html', receipt_data=receipt_data, data=receipt_data)
