@@ -37,7 +37,7 @@
                     <tr>
                         <td class="fw-bold text-muted">#{{ loop.index }}</td>
                         <td>
-                            <a href="{{ url_for('customers.show', id=item.customer.id) }}" class="fw-semibold text-primary text-decoration-none">
+                            <a href="{{ url_for('customers.show', customer_id=item.customer.id) }}" class="fw-semibold text-primary text-decoration-none">
                                 {{ item.customer.customer_code }}
                             </a>
                         </td>
