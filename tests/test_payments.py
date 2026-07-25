@@ -248,8 +248,8 @@ def test_receipt_printable_data(app, test_setup):
         assert data['customer'].full_name == 'Kofi Mensah'
         assert data['payment'].amount == 100.00
         assert data['order'].total_amount == 100.00
-        assert len(data['order']['items']) == 1
-        assert data['order']['items'][0]['service_name'] == 'Suit Washing & Pressing'
+        assert len(data['items']) == 1
+        assert data['items'][0].service.service_name == 'Suit Washing & Pressing'
 
 
 def test_payments_routes_access(client, app, test_setup):
