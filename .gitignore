@@ -20,11 +20,14 @@ instance/
 *.sqlite
 *.sqlite3
 
-# Logs & Uploads
+# Logs & Uploads & Backups
 logs/*.log
 !logs/.gitkeep
 uploads/*
 !uploads/.gitkeep
+backups/*
+!backups/.gitkeep
+
 
 # IDE & OS
 .vscode/

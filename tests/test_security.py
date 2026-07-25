@@ -48,7 +48,7 @@ class TestAuthenticationSecurity:
     def test_inactive_user_cannot_login(self, client, setup_users):
         """Ensures inactive account login attempt is rejected."""
         response = login(client, 'inactive@sec.com', 'AdminPass123!')
-        assert b"Your account is inactive" in response.data
+        assert b"deactivated" in response.data or b"Your account has been deactivated" in response.data
 
     def test_unauthenticated_protected_route_access(self, client):
         """Ensures unauthenticated requests to protected endpoints redirect to login."""

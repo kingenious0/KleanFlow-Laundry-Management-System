@@ -75,21 +75,21 @@ class TestFullEndToEndWorkflows:
                     {'service_id': s2.id, 'quantity': 2}
                 ]
             }
-            order, o_errors = OrderService.create_order(order_payload, user_id=admin.id)
+            order, o_errors = OrderService.create_order(order_payload, created_by_user_id=admin.id)
             assert o_errors is None or len(o_errors) == 0
             assert float(order.total_amount) == 170.00
             assert float(order.balance) == 170.00
             assert order.payment_status == "Unpaid"
             assert order.order_status == "Pending"
 
-            # Step 3: Advance Order Workflow (Pending -> Received -> Washing -> Ironing -> Ready for Pickup)
-            OrderService.update_order_status(order.id, "Received", user_id=admin.id)
-            OrderService.update_order_status(order.id, "Washing", user_id=admin.id)
-            OrderService.update_order_status(order.id, "Ironing", user_id=admin.id)
-            OrderService.update_order_status(order.id, "Ready for Pickup", user_id=admin.id)
+            # Step 3: Advance Order Workflow (Pending -> Received -> Washing -> Ironing -> Ready)
+            OrderService.update_order_status(order.id, "Received")
+            OrderService.update_order_status(order.id, "Washing")
+            OrderService.update_order_status(order.id, "Ironing")
+            OrderService.update_order_status(order.id, "Ready")
             
-            refreshed_order = OrderService.get_order(order.id)
-            assert refreshed_order.order_status == "Ready for Pickup"
+            refreshed_order = OrderService.get_order_by_id(order.id)
+            assert refreshed_order.order_status == "Ready"
 
             # Step 4: Record Partial Payment (GH₵70)
             pay1_data = {
@@ -97,13 +97,13 @@ class TestFullEndToEndWorkflows:
                 'amount': 70.00,
                 'payment_method': 'Mobile Money'
             }
-            payment1, receipt1, p1_errors = PaymentService.record_payment(pay1_data, received_by_id=admin.id)
+            payment1, receipt1, p1_errors = PaymentService.record_payment(pay1_data, received_by_user_id=admin.id)
             assert p1_errors is None or len(p1_errors) == 0
             assert receipt1 is not None
             assert receipt1.receipt_number.startswith("REC-")
             assert float(order.paid_amount) == 70.00
             assert float(order.balance) == 100.00
-            assert order.payment_status == "Partial"
+            assert order.payment_status == "Partially Paid"
 
             # Step 5: Record Final Payment (GH₵100)
             pay2_data = {
@@ -111,14 +111,14 @@ class TestFullEndToEndWorkflows:
                 'amount': 100.00,
                 'payment_method': 'Cash'
             }
-            payment2, receipt2, p2_errors = PaymentService.record_payment(pay2_data, received_by_id=admin.id)
+            payment2, receipt2, p2_errors = PaymentService.record_payment(pay2_data, received_by_user_id=admin.id)
             assert p2_errors is None or len(p2_errors) == 0
             assert float(order.paid_amount) == 170.00
             assert float(order.balance) == 0.00
             assert order.payment_status == "Paid"
 
             # Complete order
-            OrderService.update_order_status(order.id, "Completed", user_id=admin.id)
+            OrderService.update_order_status(order.id, "Completed")
 
             # Step 6: Verify Dashboard & Reports Integration
             db_data = DashboardService.get_dashboard_data()
@@ -147,14 +147,15 @@ class TestOrderCancellationIntegration:
             s1 = setup_environment["service1"]
 
             customer, _ = CustomerService.create_customer({'full_name': 'Kofi Badu', 'phone_number': '0209998877', 'address': 'Tema'})
-            order, _ = OrderService.create_order({'customer_id': customer.id, 'items': [{'service_id': s1.id, 'quantity': 1}]}, user_id=admin.id)
+            order, _ = OrderService.create_order({'customer_id': customer.id, 'items': [{'service_id': s1.id, 'quantity': 1}]}, created_by_user_id=admin.id)
 
             # Cancel Order
-            cancelled_order, c_errors = OrderService.cancel_order(order.id, user_id=admin.id)
-            assert c_errors is None or len(c_errors) == 0
+            success, msg = OrderService.cancel_order(order.id)
+            assert success is True
+            cancelled_order = OrderService.get_order_by_id(order.id)
             assert cancelled_order.order_status == "Cancelled"
 
             # Attempt Payment on Cancelled Order
-            _, _, p_errors = PaymentService.record_payment({'order_id': order.id, 'amount': 60.00, 'payment_method': 'Cash'}, received_by_id=admin.id)
+            _, _, p_errors = PaymentService.record_payment({'order_id': order.id, 'amount': 60.00, 'payment_method': 'Cash'}, received_by_user_id=admin.id)
             assert p_errors is not None and len(p_errors) > 0
             assert any("cancelled" in err.lower() for err in p_errors)

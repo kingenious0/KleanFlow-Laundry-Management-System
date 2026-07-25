@@ -36,6 +36,11 @@ class Config:
     CURRENCY = os.getenv('CURRENCY', 'GHS')
     TAX_RATE = float(os.getenv('TAX_RATE', 0.00))
 
+    # Security & Session Settings
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_HTTPONLY = True
+
     # File Upload Config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max limit
@@ -44,6 +49,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development Configuration"""
     DEBUG = True
+    SESSION_COOKIE_SECURE = False
 
 
 class TestingConfig(Config):
@@ -51,12 +57,26 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    SESSION_COOKIE_SECURE = False
 
 
 class ProductionConfig(Config):
     """Production Configuration"""
     DEBUG = False
     TESTING = False
+    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True').lower() in ('true', '1', 'yes')
+
+    # Security check for default secret key
+    @classmethod
+    def init_app(cls, app):
+        secret = os.getenv('SECRET_KEY')
+        if not secret or secret == 'default-dev-key-kleanflow-2026':
+            import warnings
+            warnings.warn(
+                "CRITICAL SECURITY WARNING: Production environment is using default or missing SECRET_KEY! "
+                "Set a strong SECRET_KEY in your .env file.",
+                RuntimeWarning
+            )
 
 
 config_by_name = {
@@ -65,3 +85,4 @@ config_by_name = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+
