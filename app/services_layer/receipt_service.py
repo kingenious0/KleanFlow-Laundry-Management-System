@@ -49,6 +49,7 @@ class ReceiptService:
             'receipt': receipt,
             'receipt_number': receipt.receipt_number,
             'printed_at': receipt.printed_at,
+            'issued_at': receipt.printed_at,
             'order': order,
             'order_number': order.order_number if order else 'N/A',
             'customer': customer,
@@ -60,6 +61,10 @@ class ReceiptService:
             'total_order_amount': float(order.total_amount) if order else 0.0,
             'total_paid_so_far': float(order.paid_amount) if order else 0.0,
             'remaining_balance': float(order.balance) if order else 0.0,
+            'business_name': 'KleanFlow Laundry Management System',
+            'business_address': 'Digital Center Annex, Ring Road Central, Accra, Ghana',
+            'business_phone': '+233 20 000 0000',
+            'business_email': 'support@kleanflow.com',
             'business': {
                 'name': 'KleanFlow Laundry Management System',
                 'tagline': 'Premium Laundry, Dry Cleaning & Delivery',
