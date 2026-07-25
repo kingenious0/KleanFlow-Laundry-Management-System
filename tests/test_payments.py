@@ -53,16 +53,15 @@ def test_setup(app):
             customer_code='CUST-0001',
             full_name='Kofi Mensah',
             phone_number='0244123456',
-            address='Accra Central',
-            is_active=True
+            address='Accra Central'
         )
 
         # Create Service
         service = Service(
-            name='Suit Washing & Pressing',
+            service_name='Suit Washing & Pressing',
             category='Dry Cleaning',
             price=50.00,
-            is_active=True
+            status='Active'
         )
 
         db.session.add_all([cashier, customer, service])
