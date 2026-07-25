@@ -45,6 +45,7 @@ class ReceiptService:
         payment = receipt.payment
 
         return {
+            'id': receipt.id,
             'receipt': receipt,
             'receipt_number': receipt.receipt_number,
             'printed_at': receipt.printed_at,

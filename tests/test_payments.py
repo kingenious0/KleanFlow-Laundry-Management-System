@@ -245,7 +245,7 @@ def test_receipt_printable_data(app, test_setup):
         data = ReceiptService.get_receipt_printable_data(receipt.id)
         assert data is not None
         assert data['receipt_number'] == receipt.receipt_number
-        assert data['customer']['name'] == 'Kofi Mensah'
+        assert data['customer'].full_name == 'Kofi Mensah'
         assert data['payment']['amount'] == 100.00
         assert data['order']['total_amount'] == 100.00
         assert len(data['order']['items']) == 1
