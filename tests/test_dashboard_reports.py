@@ -76,8 +76,8 @@ def setup_data(app):
     db.session.commit()
 
     # Order Items
-    item1 = OrderItem(order_id=order1.id, service_id=service1.id, service_name=service1.service_name, unit_price=50.0, quantity=2, total_price=100.0)
-    item2 = OrderItem(order_id=order2.id, service_id=service2.id, service_name=service2.service_name, unit_price=20.0, quantity=3, total_price=60.0)
+    item1 = OrderItem(order_id=order1.id, service_id=service1.id, unit_price=50.0, quantity=2, subtotal=100.0)
+    item2 = OrderItem(order_id=order2.id, service_id=service2.id, unit_price=20.0, quantity=3, subtotal=60.0)
     db.session.add_all([item1, item2])
     db.session.commit()
 
