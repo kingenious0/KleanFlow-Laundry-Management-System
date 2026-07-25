@@ -69,7 +69,7 @@ class ReportService:
                 customer_phone,
                 payment.payment_method,
                 f"{payment.amount:.2f}",
-                payment.created_at.strftime('%Y-%m-%d %H:%M') if payment.created_at else 'N/A'
+                payment.payment_date.strftime('%Y-%m-%d %H:%M') if payment.payment_date else 'N/A'
             ])
 
         return output.getvalue()
@@ -105,7 +105,7 @@ class ReportService:
                 c.full_name,
                 c.phone_number,
                 c.email or 'N/A',
-                item['total_orders'],
+                item['orders_count'],
                 f"{item['total_spent']:.2f}",
                 f"{item['total_balance']:.2f}"
             ])

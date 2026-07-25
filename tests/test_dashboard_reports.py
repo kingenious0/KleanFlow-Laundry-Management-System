@@ -198,10 +198,10 @@ def test_reports_routes_rbac(client, setup_data):
     assert res_unauth.status_code == 302
     assert '/auth/login' in res_unauth.location
 
-    # 2. Cashier -> Forbidden (403)
+    # 2. Cashier -> Redirected with permission error
     client.post('/auth/login', data={'email': 'cashier@test.com', 'password': 'CashierPass123!'})
-    res_cashier = client.get('/reports/')
-    assert res_cashier.status_code == 403
+    res_cashier = client.get('/reports/', follow_redirects=True)
+    assert b"do not have permission" in res_cashier.data
 
     # Logout cashier
     client.get('/auth/logout')
