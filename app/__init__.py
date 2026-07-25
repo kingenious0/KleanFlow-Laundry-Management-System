@@ -65,6 +65,8 @@ def create_app(config_name=None):
     from app.customers import customers_bp
     from app.services.routes import services_bp
     from app.orders.routes import orders_bp
+    from app.payments.routes import payments_bp
+    from app.receipts.routes import receipts_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
@@ -72,6 +74,8 @@ def create_app(config_name=None):
     app.register_blueprint(customers_bp)
     app.register_blueprint(services_bp)
     app.register_blueprint(orders_bp)
+    app.register_blueprint(payments_bp)
+    app.register_blueprint(receipts_bp)
 
     # Register Error Handlers
     @app.errorhandler(404)

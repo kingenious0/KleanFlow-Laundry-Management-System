@@ -21,5 +21,20 @@ class Payment(db.Model):
     # Relationships
     receipts = db.relationship('Receipt', backref='payment', lazy=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'order_id': self.order_id,
+            'order_number': self.order.order_number if self.order else None,
+            'payment_reference': self.payment_reference,
+            'payment_method': self.payment_method,
+            'amount': float(self.amount) if self.amount is not None else 0.0,
+            'payment_status': self.payment_status,
+            'received_by_id': self.received_by,
+            'receiver_name': self.receiver.full_name if self.receiver else None,
+            'payment_date': self.payment_date.isoformat() if self.payment_date else None
+        }
+
     def __repr__(self):
         return f"<Payment id={self.id} ref='{self.payment_reference}' amount={self.amount}>"
+

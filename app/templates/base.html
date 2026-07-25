@@ -56,18 +56,20 @@
                         <span>Orders</span>
                     </a>
                 </li>
+                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager', 'Cashier') %}
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'payments' %}active{% endif %}" href="{{ url_for('payments.index') }}">
                         <i class="fa-solid fa-credit-card me-3"></i>
                         <span>Payments</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'receipts' %}active{% endif %}" href="{{ url_for('receipts.index') }}">
                         <i class="fa-solid fa-receipt me-3"></i>
                         <span>Receipts</span>
                     </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link disabled" href="#">
                         <i class="fa-solid fa-truck-pickup me-3"></i>
