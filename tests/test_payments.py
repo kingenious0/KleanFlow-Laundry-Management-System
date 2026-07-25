@@ -207,7 +207,7 @@ def test_record_payment_invalid_method_fails(app, test_setup):
         )
         assert payment is None
         assert errors
-        assert any('invalid payment method' in err.lower() for err in errors)
+        assert any('payment method must be one of' in err.lower() for err in errors)
 
 
 def test_record_payment_cancelled_order_fails(app, test_setup):
@@ -246,8 +246,8 @@ def test_receipt_printable_data(app, test_setup):
         assert data is not None
         assert data['receipt_number'] == receipt.receipt_number
         assert data['customer'].full_name == 'Kofi Mensah'
-        assert data['payment']['amount'] == 100.00
-        assert data['order']['total_amount'] == 100.00
+        assert data['payment'].amount == 100.00
+        assert data['order'].total_amount == 100.00
         assert len(data['order']['items']) == 1
         assert data['order']['items'][0]['service_name'] == 'Suit Washing & Pressing'
 
