@@ -61,15 +61,15 @@ class ReceiptService:
             'total_order_amount': float(order.total_amount) if order else 0.0,
             'total_paid_so_far': float(order.paid_amount) if order else 0.0,
             'remaining_balance': float(order.balance) if order else 0.0,
-            'business_name': 'KleanFlow Laundry Management System',
-            'business_address': 'Digital Center Annex, Ring Road Central, Accra, Ghana',
-            'business_phone': '+233 20 000 0000',
+            'business_name': 'KleanFlow Laundry',
+            'business_address': 'Asafo By-Pass, Kumasi, Ghana',
+            'business_phone': '+233 55 375 1016',
             'business_email': 'support@kleanflow.com',
             'business': {
-                'name': 'KleanFlow Laundry Management System',
+                'name': 'KleanFlow Laundry',
                 'tagline': 'Premium Laundry, Dry Cleaning & Delivery',
-                'address': 'Digital Center Annex, Ring Road Central, Accra, Ghana',
-                'phone': '+233 20 000 0000',
+                'address': 'Asafo By-Pass, Kumasi, Ghana',
+                'phone': '+233 55 375 1016',
                 'email': 'support@kleanflow.com'
             }
         }
