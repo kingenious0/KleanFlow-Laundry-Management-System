@@ -14,6 +14,12 @@ import argparse
 from pathlib import Path
 from urllib import request, error as url_error
 
+# Force UTF-8 output on Windows (avoids cp1252 encode errors)
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
 # ── Resolve project root ───────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -24,12 +30,12 @@ CHECKS_FAILED = []
 
 def pass_check(name: str, detail: str = ""):
     CHECKS_PASSED.append(name)
-    print(f"  ✅ PASS  {name}" + (f" — {detail}" if detail else ""))
+    print(f"  [PASS] {name}" + (f" -- {detail}" if detail else ""))
 
 
 def fail_check(name: str, detail: str = ""):
     CHECKS_FAILED.append(name)
-    print(f"  ❌ FAIL  {name}" + (f" — {detail}" if detail else ""))
+    print(f"  [FAIL] {name}" + (f" -- {detail}" if detail else ""))
 
 
 def check_env_file():
@@ -120,19 +126,19 @@ def main():
         check_http(args.url)
 
     print()
-    print("─" * 55)
+    print("-" * 55)
     total = len(CHECKS_PASSED) + len(CHECKS_FAILED)
     print(f"  Results: {len(CHECKS_PASSED)}/{total} checks passed")
     if CHECKS_FAILED:
         print()
         print("  Failed checks:")
         for name in CHECKS_FAILED:
-            print(f"    • {name}")
+            print(f"    - {name}")
         print()
         sys.exit(1)
     else:
         print()
-        print("  🎉 All checks passed — application is healthy!")
+        print("  [OK] All checks passed -- application is healthy!")
         print()
         sys.exit(0)
 
