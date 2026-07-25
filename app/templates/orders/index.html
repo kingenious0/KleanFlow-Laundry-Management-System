@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Orders | KleanFlow{% endblock %}
+{% block page_title %}Order Management{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Laundry Orders</h4>
+        <p class="text-muted small mb-0">Track and manage customer laundry orders, processing stages, and balances.</p>
+    </div>
+    <div>
+        <a href="{{ url_for('orders.create') }}" class="btn btn-primary fw-semibold rounded-3">
+            <i class="fa-solid fa-basket-shopping me-2"></i> Create New Order
+        </a>
+    </div>
+</div>
+
+<!-- Status Filter Nav Tabs -->
+<div class="mb-4">
+    <ul class="nav nav-pills border-bottom pb-2 gap-2">
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if not selected_status or selected_status == 'All' %}active{% endif %}" href="{{ url_for('orders.index', status='All', search=search, payment_status=selected_payment_status) }}">
+                All Orders
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Pending' %}active{% endif %}" href="{{ url_for('orders.index', status='Pending', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-clock me-1 text-warning"></i> Pending
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Washing' %}active{% endif %}" href="{{ url_for('orders.index', status='Washing', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-soap me-1 text-info"></i> Washing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Ironing' %}active{% endif %}" href="{{ url_for('orders.index', status='Ironing', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-shirt me-1 text-primary"></i> Ironing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Ready' %}active{% endif %}" href="{{ url_for('orders.index', status='Ready', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-box-archive me-1 text-success"></i> Ready
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Completed' %}active{% endif %}" href="{{ url_for('orders.index', status='Completed', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-circle-check me-1 text-success"></i> Completed
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-3 {% if selected_status == 'Cancelled' %}active{% endif %}" href="{{ url_for('orders.index', status='Cancelled', search=search, payment_status=selected_payment_status) }}">
+                <i class="fa-solid fa-ban me-1 text-danger"></i> Cancelled
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Search & Secondary Filter Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" action="{{ url_for('orders.index') }}" class="row g-3 align-items-center">
+            <input type="hidden" name="status" value="{{ selected_status or 'All' }}">
+            <div class="col-12 col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 bg-light" placeholder="Search by order number (e.g. KF-2026-00001), customer name, or phone..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
+                <select name="payment_status" class="form-select bg-light">
+                    <option value="All" {% if not selected_payment_status or selected_payment_status == 'All' %}selected{% endif %}>All Payment Statuses</option>
+                    <option value="Unpaid" {% if selected_payment_status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                    <option value="Partially Paid" {% if selected_payment_status == 'Partially Paid' %}selected{% endif %}>Partially Paid</option>
+                    <option value="Paid" {% if selected_payment_status == 'Paid' %}selected{% endif %}>Paid</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Filter</button>
+                <a href="{{ url_for('orders.index') }}" class="btn btn-light border rounded-3" title="Reset Search"><i class="fa-solid fa-rotate"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Orders List Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Order Number</th>
+                        <th>Customer</th>
+                        <th>Total (GH₵)</th>
+                        <th>Balance (GH₵)</th>
+                        <th>Order Status</th>
+                        <th>Payment Status</th>
+                        <th>Date</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if orders %}
+                        {% for o in orders %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('orders.show', order_id=o.id) }}" class="fw-bold font-monospace text-primary text-decoration-none">
+                                    {{ o.order_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary-subtle text-primary fw-bold rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-size: 13px;">
+                                        {{ o.customer.full_name[:2].upper() if o.customer else 'CU' }}
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('customers.show', customer_id=o.customer_id) }}" class="fw-semibold text-dark text-decoration-none fs-7">
+                                            {{ o.customer.full_name if o.customer else 'Unknown Customer' }}
+                                        </a>
+                                        <small class="text-muted d-block fs-7">{{ o.customer.phone_number if o.customer else '' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="fw-bold text-dark fs-7">
+                                GH₵ {{ "%.2f"|format(o.total_amount) }}
+                            </td>
+                            <td>
+                                {% if o.balance > 0 %}
+                                    <span class="fw-bold text-danger fs-7">GH₵ {{ "%.2f"|format(o.balance) }}</span>
+                                {% else %}
+                                    <span class="fw-semibold text-success fs-7">GH₵ 0.00</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set st = o.order_status %}
+                                {% if st == 'Pending' %}
+                                    <span class="badge bg-warning-subtle text-dark border px-2 py-1 rounded-2"><i class="fa-solid fa-clock me-1"></i> Pending</span>
+                                {% elif st == 'Received' %}
+                                    <span class="badge bg-secondary-subtle text-dark border px-2 py-1 rounded-2"><i class="fa-solid fa-inbox me-1"></i> Received</span>
+                                {% elif st == 'Washing' %}
+                                    <span class="badge bg-info-subtle text-info-emphasis border px-2 py-1 rounded-2"><i class="fa-solid fa-soap me-1"></i> Washing</span>
+                                {% elif st == 'Ironing' %}
+                                    <span class="badge bg-primary-subtle text-primary border px-2 py-1 rounded-2"><i class="fa-solid fa-shirt me-1"></i> Ironing</span>
+                                {% elif st == 'Ready' %}
+                                    <span class="badge bg-success-subtle text-success border px-2 py-1 rounded-2"><i class="fa-solid fa-box-archive me-1"></i> Ready</span>
+                                {% elif st == 'Completed' %}
+                                    <span class="badge bg-success text-white px-2 py-1 rounded-2"><i class="fa-solid fa-circle-check me-1"></i> Completed</span>
+                                {% elif st == 'Cancelled' %}
+                                    <span class="badge bg-danger-subtle text-danger border px-2 py-1 rounded-2"><i class="fa-solid fa-ban me-1"></i> Cancelled</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border px-2 py-1 rounded-2">{{ st }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set pst = o.payment_status %}
+                                {% if pst == 'Paid' %}
+                                    <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">Paid</span>
+                                {% elif pst == 'Partially Paid' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1 rounded-pill">Partial</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">
+                                {{ o.created_at.strftime('%b %d, %H:%M') if o.created_at else 'N/A' }}
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{{ url_for('orders.show', order_id=o.id) }}" class="btn btn-sm btn-light border rounded-2" title="View Order Details">
+                                    <i class="fa-solid fa-eye text-primary"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-basket-shopping fs-1 d-block mb-3 text-secondary"></i>
+                                No laundry orders found matching your search criteria.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        {% if pagination and pagination.pages > 1 %}
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
+            <small class="text-muted">Showing {{ pagination.items|length }} of {{ pagination.total }} orders</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('orders.index', page=pagination.prev_num, search=search, status=selected_status, payment_status=selected_payment_status) }}">Previous</a>
+                    </li>
+                    {% for p in pagination.iter_pages() %}
+                        {% if p %}
+                            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('orders.index', page=p, search=search, status=selected_status, payment_status=selected_payment_status) }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('orders.index', page=pagination.next_num, search=search, status=selected_status, payment_status=selected_payment_status) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

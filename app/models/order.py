@@ -29,5 +29,44 @@ class Order(db.Model):
     pickup = db.relationship('Pickup', backref='order', uselist=False, lazy=True)
     delivery = db.relationship('Delivery', backref='order', uselist=False, lazy=True)
 
+    def can_be_cancelled(self):
+        """Order can be cancelled if not Completed and not already Cancelled."""
+        return self.order_status not in ['Completed', 'Cancelled']
+
+    def update_payment_status(self):
+        """Updates payment status based on paid_amount and total_amount."""
+        tot = float(self.total_amount) if self.total_amount is not None else 0.0
+        paid = float(self.paid_amount) if self.paid_amount is not None else 0.0
+        self.balance = max(0.0, tot - paid)
+
+        if paid <= 0:
+            self.payment_status = 'Unpaid'
+        elif paid < tot:
+            self.payment_status = 'Partially Paid'
+        else:
+            self.payment_status = 'Paid'
+
+    def recalculate_totals(self):
+        """Recalculates total_amount and balance based on order line items."""
+        total = sum([float(item.subtotal) for item in self.items if item.subtotal is not None])
+        self.total_amount = total
+        self.update_payment_status()
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'order_number': self.order_number,
+            'customer_id': self.customer_id,
+            'customer_name': self.customer.full_name if self.customer else None,
+            'total_amount': float(self.total_amount) if self.total_amount is not None else 0.0,
+            'paid_amount': float(self.paid_amount) if self.paid_amount is not None else 0.0,
+            'balance': float(self.balance) if self.balance is not None else 0.0,
+            'payment_status': self.payment_status,
+            'order_status': self.order_status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'items_count': len(self.items) if self.items else 0
+        }
+
     def __repr__(self):
         return f"<Order id={self.id} number='{self.order_number}' status='{self.order_status}'>"
+

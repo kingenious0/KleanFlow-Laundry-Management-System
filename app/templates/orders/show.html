@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Order Details #{{ order.order_number }} | KleanFlow{% endblock %}
+{% block page_title %}Order Details{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h4 class="fw-bold mb-0 font-monospace text-primary">#{{ order.order_number }}</h4>
+            {% set st = order.order_status %}
+            {% if st == 'Pending' %}
+                <span class="badge bg-warning-subtle text-dark border"><i class="fa-solid fa-clock me-1"></i> Pending</span>
+            {% elif st == 'Received' %}
+                <span class="badge bg-secondary-subtle text-dark border"><i class="fa-solid fa-inbox me-1"></i> Received</span>
+            {% elif st == 'Washing' %}
+                <span class="badge bg-info-subtle text-info-emphasis border"><i class="fa-solid fa-soap me-1"></i> Washing</span>
+            {% elif st == 'Ironing' %}
+                <span class="badge bg-primary-subtle text-primary border"><i class="fa-solid fa-shirt me-1"></i> Ironing</span>
+            {% elif st == 'Ready' %}
+                <span class="badge bg-success-subtle text-success border"><i class="fa-solid fa-box-archive me-1"></i> Ready</span>
+            {% elif st == 'Completed' %}
+                <span class="badge bg-success text-white"><i class="fa-solid fa-circle-check me-1"></i> Completed</span>
+            {% elif st == 'Cancelled' %}
+                <span class="badge bg-danger-subtle text-danger border"><i class="fa-solid fa-ban me-1"></i> Cancelled</span>
+            {% endif %}
+
+            {% set pst = order.payment_status %}
+            {% if pst == 'Paid' %}
+                <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">Paid</span>
+            {% elif pst == 'Partially Paid' %}
+                <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1 rounded-pill">Partial</span>
+            {% else %}
+                <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill">Unpaid</span>
+            {% endif %}
+        </div>
+        <p class="text-muted small mb-0">Created on {{ order.created_at.strftime('%B %d, %Y at %H:%M') if order.created_at else 'N/A' }} {% if order.creator %}by {{ order.creator.full_name }}{% endif %}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('orders.index') }}" class="btn btn-light border rounded-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Orders
+        </a>
+        {% if order.can_be_cancelled() and current_user.has_role('Administrator', 'Manager', 'Cashier') %}
+            <button type="button" class="btn btn-outline-danger rounded-3" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                <i class="fa-solid fa-ban me-1"></i> Cancel Order
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Workflow Stepper Pipeline Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-3 text-uppercase text-muted fs-7">Processing Lifecycle Progress</h6>
+
+        {% set stages = ['Pending', 'Received', 'Washing', 'Ironing', 'Ready', 'Completed'] %}
+        {% set stage_icons = {
+            'Pending': 'fa-clock',
+            'Received': 'fa-inbox',
+            'Washing': 'fa-soap',
+            'Ironing': 'fa-shirt',
+            'Ready': 'fa-box-archive',
+            'Completed': 'fa-circle-check'
+        } %}
+
+        {% if order.order_status == 'Cancelled' %}
+            <div class="alert alert-danger mb-0 rounded-3 d-flex align-items-center">
+                <i class="fa-solid fa-triangle-exclamation fs-4 me-3"></i>
+                <div>
+                    <strong class="d-block">This order has been Cancelled.</strong>
+                    <span class="small">Per BR-ORD-004, cancelled orders remain stored in history and accept no further processing or payment updates.</span>
+                </div>
+            </div>
+        {% else %}
+            <div class="d-flex flex-wrap justify-content-between align-items-center position-relative my-2 gap-2">
+                {% for stage in stages %}
+                    {% set is_current = (order.order_status == stage) %}
+                    {% set is_past = (stages.index(order.order_status) > stages.index(stage)) if order.order_status in stages else False %}
+
+                    <div class="text-center flex-fill position-relative">
+                        <div class="avatar rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 shadow-sm
+                            {% if is_current %}bg-primary text-white ring-4 ring-primary-subtle{% elif is_past %}bg-success text-white{% else %}bg-light text-muted border{% endif %}"
+                            style="width: 44px; height: 44px; font-size: 18px;">
+                            <i class="fa-solid {{ stage_icons[stage] }}"></i>
+                        </div>
+                        <span class="d-block fw-semibold small {% if is_current %}text-primary fw-bold{% elif is_past %}text-success{% else %}text-muted{% endif %}">
+                            {{ stage }}
+                        </span>
+
+                        {% if is_current and stage != 'Completed' %}
+                            <form method="POST" action="{{ url_for('orders.update_status', order_id=order.id) }}" class="mt-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                {% set next_stage = stages[stages.index(stage) + 1] if stages.index(stage) + 1 < stages|length else None %}
+                                {% if next_stage %}
+                                    <input type="hidden" name="order_status" value="{{ next_stage }}">
+                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fs-7">
+                                        Mark as {{ next_stage }} <i class="fa-solid fa-chevron-right ms-1 fs-8"></i>
+                                    </button>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Order Line Items Breakdown Card -->
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-list me-2 text-primary"></i> Order Items Breakdown</h5>
+                <span class="badge bg-light text-dark border px-2 py-1 font-monospace">{{ order.items|length }} Item Line(s)</span>
+            </div>
+            <div class="card-body p-0 mt-3">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Service</th>
+                                <th>Garment / Notes</th>
+                                <th>Unit Price (GH₵)</th>
+                                <th>Qty</th>
+                                <th class="text-end pe-4">Subtotal (GH₵)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-semibold text-dark">{{ item.service.service_name if item.service else 'Service #' ~ item.service_id }}</span>
+                                    <small class="text-muted d-block fs-7">{{ item.service.category if item.service else '' }}</small>
+                                </td>
+                                <td class="text-muted small">
+                                    {{ item.clothing_type or '-' }}
+                                </td>
+                                <td>GH₵ {{ "%.2f"|format(item.unit_price) }}</td>
+                                <td class="fw-bold">{{ item.quantity }}</td>
+                                <td class="text-end pe-4 fw-bold text-dark">
+                                    GH₵ {{ "%.2f"|format(item.subtotal) }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 bg-light border-top rounded-bottom-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Subtotal Amount:</span>
+                        <span class="fw-semibold">GH₵ {{ "%.2f"|format(order.total_amount) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Paid Amount:</span>
+                        <span class="fw-semibold text-success">GH₵ {{ "%.2f"|format(order.paid_amount) }}</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Total Amount:</h5>
+                        <h4 class="fw-bold text-primary mb-0">GH₵ {{ "%.2f"|format(order.total_amount) }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer & Financial Summary Sidebar -->
+    <div class="col-12 col-lg-4">
+        <!-- Customer Info Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3 text-uppercase text-muted fs-7"><i class="fa-solid fa-user me-2 text-primary"></i> Customer Details</h6>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="avatar bg-primary text-white fw-bold rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        {{ order.customer.full_name[:2].upper() if order.customer else 'CU' }}
+                    </div>
+                    <div>
+                        <a href="{{ url_for('customers.show', customer_id=order.customer_id) }}" class="fw-bold text-dark text-decoration-none">
+                            {{ order.customer.full_name if order.customer else 'N/A' }}
+                        </a>
+                        <small class="badge bg-light text-dark border font-monospace d-block mt-1">{{ order.customer.customer_code if order.customer else '' }}</small>
+                    </div>
+                </div>
+                <div class="small mb-2">
+                    <i class="fa-solid fa-phone me-2 text-muted"></i> <strong>{{ order.customer.phone_number if order.customer else 'N/A' }}</strong>
+                </div>
+                <div class="small mb-2">
+                    <i class="fa-solid fa-location-dot me-2 text-muted"></i> {{ order.customer.address if order.customer else 'N/A' }}
+                </div>
+                {% if order.customer.email %}
+                <div class="small">
+                    <i class="fa-solid fa-envelope me-2 text-muted"></i> {{ order.customer.email }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment & Balance Summary Card -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3 text-uppercase text-muted fs-7"><i class="fa-solid fa-wallet me-2 text-primary"></i> Payment Overview</h6>
+                <div class="p-3 bg-light rounded-3 mb-3 border">
+                    <div class="small text-muted mb-1">REMAINING BALANCE</div>
+                    {% if order.balance > 0 %}
+                        <h3 class="fw-bold text-danger mb-0">GH₵ {{ "%.2f"|format(order.balance) }}</h3>
+                    {% else %}
+                        <h3 class="fw-bold text-success mb-0">GH₵ 0.00</h3>
+                        <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check"></i> Fully Paid</small>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Order Total:</span>
+                    <span class="fw-semibold text-dark">GH₵ {{ "%.2f"|format(order.total_amount) }}</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>Payments Received:</span>
+                    <span class="fw-semibold text-success">GH₵ {{ "%.2f"|format(order.paid_amount) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Order Confirmation Modal -->
+{% if order.can_be_cancelled() %}
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">Cancel Order #{{ order.order_number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                Are you sure you want to cancel order <strong>#{{ order.order_number }}</strong>?
+                Per BR-ORD-004, cancelled orders remain stored in history and will accept no further processing or payment records.
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Keep Order</button>
+                <form method="POST" action="{{ url_for('orders.cancel', order_id=order.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger rounded-3">Confirm Cancellation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

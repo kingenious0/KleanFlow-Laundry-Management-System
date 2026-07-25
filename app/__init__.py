@@ -64,12 +64,14 @@ def create_app(config_name=None):
     from app.users import users_bp
     from app.customers import customers_bp
     from app.services.routes import services_bp
+    from app.orders.routes import orders_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(services_bp)
+    app.register_blueprint(orders_bp)
 
     # Register Error Handlers
     @app.errorhandler(404)
