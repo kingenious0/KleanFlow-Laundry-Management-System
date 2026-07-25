@@ -65,10 +65,10 @@
                             <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ receipt.payment.order.customer.phone_number }}</small>
                         </td>
                         <td>
-                            <span class="fw-bold text-success">GH₵ {{ "%.2f"|format(receipt.amount_paid) }}</span>
+                            <span class="fw-bold text-success">GH₵ {{ "%.2f"|format(receipt.payment.amount if receipt.payment else 0.0) }}</span>
                         </td>
                         <td>
-                            <small class="text-muted">{{ receipt.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            <small class="text-muted">{{ receipt.printed_at.strftime('%Y-%m-%d %H:%M') if receipt.printed_at else 'N/A' }}</small>
                         </td>
                         <td class="text-end pe-4">
                             <a href="{{ url_for('receipts.show', receipt_id=receipt.id) }}" class="btn btn-sm btn-outline-primary rounded-3 me-1" title="View Official Receipt">
