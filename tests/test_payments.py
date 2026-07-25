@@ -1,4 +1,5 @@
 import pytest
+from app import create_app
 from app.extensions import db
 from app.models.user import User
 from app.models.customer import Customer
@@ -9,6 +10,28 @@ from app.models.payment import Payment
 from app.models.receipt import Receipt
 from app.services_layer.payment_service import PaymentService
 from app.services_layer.receipt_service import ReceiptService
+
+
+@pytest.fixture
+def app():
+    """Create test application instance."""
+    app = create_app('testing')
+    app.config.update({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'WTF_CSRF_ENABLED': False
+    })
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+
+@pytest.fixture
+def client(app):
+    """Test client instance."""
+    return app.test_client()
 
 
 @pytest.fixture
@@ -218,7 +241,7 @@ def test_payments_routes_access(client, app, test_setup):
     """Test HTTP routes for payments with auth and CSRF disabled."""
     # Login as cashier
     client.post('/auth/login', data={
-        'username': 'testcashier',
+        'email': 'cashier@kleanflow.com',
         'password': 'Password123!'
     })
 
