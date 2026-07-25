@@ -82,12 +82,14 @@
                         <span>Deliveries</span>
                     </a>
                 </li>
+                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link {% if request.blueprint == 'reports' %}active{% endif %}" href="{{ url_for('reports.index') }}">
                         <i class="fa-solid fa-chart-line me-3"></i>
                         <span>Reports</span>
                     </a>
                 </li>
+                {% endif %}
                 {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
                 <li class="nav-item mt-3">
                     <small class="text-uppercase text-muted px-3 fw-semibold fs-7">Administration</small>

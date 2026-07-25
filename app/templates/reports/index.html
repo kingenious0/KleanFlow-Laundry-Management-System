@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics | KleanFlow Laundry System{% endblock %}
+{% block page_title %}Reports Central Portal{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Revenue Report Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100 p-4">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-shape bg-success-subtle text-success rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-file-invoice-dollar fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Revenue Reports</h5>
+                    <p class="text-muted small mb-0">Financial & Payment Analytics</p>
+                </div>
+            </div>
+            <p class="text-muted small mb-4">
+                Detailed breakdowns of incoming revenue by payment method (Cash, MoMo, Card, Bank), filtered by custom date ranges with CSV export capability.
+            </p>
+            <div class="mt-auto">
+                <a href="{{ url_for('reports.revenue_report') }}" class="btn btn-primary w-100 rounded-2">
+                    <i class="fa-solid fa-chart-line me-2"></i> View Revenue Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Spending Report Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100 p-4">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-shape bg-primary-subtle text-primary rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-users-rectangle fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Customer Analytics</h5>
+                    <p class="text-muted small mb-0">Spending Leaderboards</p>
+                </div>
+            </div>
+            <p class="text-muted small mb-4">
+                Analyze top customer spending, order frequency, total paid amounts, and outstanding balances across your customer base.
+            </p>
+            <div class="mt-auto">
+                <a href="{{ url_for('reports.customer_report') }}" class="btn btn-outline-primary w-100 rounded-2">
+                    <i class="fa-solid fa-users me-2"></i> View Customer Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Statements Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100 p-4">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-shape bg-info-subtle text-info rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-print fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Printable Summary</h5>
+                    <p class="text-muted small mb-0">Official Management Brief</p>
+                </div>
+            </div>
+            <p class="text-muted small mb-4">
+                Generate clean, print-formatted financial and operations summaries suitable for management audit and physical archiving.
+            </p>
+            <div class="mt-auto">
+                <a href="{{ url_for('reports.print_report') }}" target="_blank" class="btn btn-outline-secondary w-100 rounded-2">
+                    <i class="fa-solid fa-print me-2"></i> Print Report Brief
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

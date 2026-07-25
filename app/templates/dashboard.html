@@ -3,101 +3,369 @@
 {% block title %}Dashboard | KleanFlow Laundry System{% endblock %}
 {% block page_title %}Dashboard Overview{% endblock %}
 
+{% block extra_css %}
+<style>
+    .kpi-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08) !important;
+    }
+    .chart-container {
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row g-4 mb-4">
-    <!-- Stat Card 1 -->
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-3 p-3">
+<!-- KPI Cards Row -->
+<div class="row g-3 mb-4">
+    <!-- Today's Revenue -->
+    <div class="col-12 col-sm-6 col-xl-2-4 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3 kpi-card bg-white h-100">
             <div class="d-flex align-items-center">
-                <div class="icon-shape bg-primary-subtle text-primary rounded-3 p-3 me-3">
-                    <i class="fa-solid fa-basket-shopping fs-4"></i>
+                <div class="icon-shape bg-success-subtle text-success rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-coins fs-4"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted fw-normal mb-1">Total Orders</h6>
-                    <h3 class="fw-bold mb-0">0</h3>
+                    <h6 class="text-muted fw-normal mb-1 small text-uppercase">Today's Revenue</h6>
+                    <h4 class="fw-bold mb-0 text-dark">GH₵ {{ "%.2f"|format(kpis.today_revenue) }}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Stat Card 2 -->
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-3 p-3">
+
+    <!-- Monthly Revenue -->
+    <div class="col-12 col-sm-6 col-xl-2-4 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3 kpi-card bg-white h-100">
             <div class="d-flex align-items-center">
-                <div class="icon-shape bg-success-subtle text-success rounded-3 p-3 me-3">
+                <div class="icon-shape bg-primary-subtle text-primary rounded-3 p-3 me-3">
                     <i class="fa-solid fa-money-bill-wave fs-4"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted fw-normal mb-1">Total Revenue</h6>
-                    <h3 class="fw-bold mb-0">GH₵0.00</h3>
+                    <h6 class="text-muted fw-normal mb-1 small text-uppercase">This Month's Rev.</h6>
+                    <h4 class="fw-bold mb-0 text-dark">GH₵ {{ "%.2f"|format(kpis.monthly_revenue) }}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Stat Card 3 -->
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-3 p-3">
+
+    <!-- Monthly Orders -->
+    <div class="col-12 col-sm-6 col-xl-2-4 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3 kpi-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="icon-shape bg-info-subtle text-info rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-basket-shopping fs-4"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-normal mb-1 small text-uppercase">Orders (Month)</h6>
+                    <h4 class="fw-bold mb-0 text-dark">{{ kpis.orders_count_month }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unpaid Balance -->
+    <div class="col-12 col-sm-6 col-xl-2-4 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 kpi-card bg-white h-100">
+            <div class="d-flex align-items-center">
+                <div class="icon-shape bg-danger-subtle text-danger rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-scale-unbalanced-flip fs-4"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-normal mb-1 small text-uppercase">Unpaid Balance</h6>
+                    <h4 class="fw-bold mb-0 text-danger">GH₵ {{ "%.2f"|format(kpis.unpaid_balance) }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Customers -->
+    <div class="col-12 col-sm-6 col-xl-2-4 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 kpi-card bg-white h-100">
             <div class="d-flex align-items-center">
                 <div class="icon-shape bg-warning-subtle text-warning rounded-3 p-3 me-3">
                     <i class="fa-solid fa-users fs-4"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted fw-normal mb-1">Active Customers</h6>
-                    <h3 class="fw-bold mb-0">0</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Stat Card 4 -->
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-3 p-3">
-            <div class="d-flex align-items-center">
-                <div class="icon-shape bg-info-subtle text-info rounded-3 p-3 me-3">
-                    <i class="fa-solid fa-truck-fast fs-4"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted fw-normal mb-1">Pending Deliveries</h6>
-                    <h3 class="fw-bold mb-0">0</h3>
+                    <h6 class="text-muted fw-normal mb-1 small text-uppercase">Active Customers</h6>
+                    <h4 class="fw-bold mb-0 text-dark">{{ kpis.active_customers }}</h4>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-3 p-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-            <h5 class="fw-bold mb-1"><i class="fa-solid fa-cubes text-primary me-2"></i>Phase 1 — Foundation Initialized</h5>
-            <p class="text-muted small mb-0">System core initialized cleanly: Flask, SQLAlchemy Models, Application Factory, Flask-Migrate, and Flask-Login.</p>
-        </div>
-        <span class="badge bg-success-subtle text-success px-3 py-2 fs-7 rounded-pill">
-            <i class="fa-solid fa-circle-check me-1"></i> System Online
-        </span>
-    </div>
-    <hr>
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="p-3 bg-light rounded-3">
-                <h6 class="fw-semibold text-dark"><i class="fa-solid fa-database text-secondary me-2"></i>Database Models Configured</h6>
-                <ul class="list-unstyled mb-0 small text-muted">
-                    <li><i class="fa-solid fa-check text-success me-2"></i>User &amp; Customer Models</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Service &amp; Order Models</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>OrderItem &amp; Payment Models</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Receipt, Pickup, Delivery Models</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Notification &amp; Setting Models</li>
-                </ul>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="p-3 bg-light rounded-3">
-                <h6 class="fw-semibold text-dark"><i class="fa-solid fa-layer-group text-secondary me-2"></i>Architecture Ready</h6>
-                <ul class="list-unstyled mb-0 small text-muted">
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Application Factory (`create_app`)</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Flask-Migrate (`migrations/`)</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Flask-Login Manager integration</li>
-                    <li><i class="fa-solid fa-check text-success me-2"></i>Modular Blueprints Directory Structure</li>
-                </ul>
+<!-- Quick Actions Bar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="fw-semibold text-dark"><i class="fa-solid fa-bolt text-warning me-2"></i>Quick Actions:</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('orders.create') }}" class="btn btn-primary btn-sm rounded-2">
+                        <i class="fa-solid fa-plus me-1"></i> New Order
+                    </a>
+                    <a href="{{ url_for('payments.record') }}" class="btn btn-success btn-sm rounded-2">
+                        <i class="fa-solid fa-hand-holding-dollar me-1"></i> Record Payment
+                    </a>
+                    <a href="{{ url_for('customers.create') }}" class="btn btn-outline-primary btn-sm rounded-2">
+                        <i class="fa-solid fa-user-plus me-1"></i> Add Customer
+                    </a>
+                    {% if current_user.has_role('Administrator', 'Manager') %}
+                    <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary btn-sm rounded-2">
+                        <i class="fa-solid fa-chart-line me-1"></i> View Reports
+                    </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Revenue Trend (Line Chart) -->
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-white h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>Revenue Trend (Last 6 Months)</h6>
+                <span class="badge bg-light text-muted fw-normal">GH₵</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Distribution (Doughnut Chart) -->
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-white h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-pie text-info me-2"></i>Order Status Breakdown</h6>
+                <span class="badge bg-light text-muted fw-normal">Live</span>
+            </div>
+            <div class="chart-container d-flex align-items-center justify-content-center">
+                <canvas id="orderStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Services & Recent Activity Row -->
+<div class="row g-4 mb-4">
+    <!-- Top Services (Bar Chart) -->
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-white h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-trophy text-warning me-2"></i>Top Performing Services</h6>
+                <span class="badge bg-light text-muted fw-normal">By Revenue</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="topServicesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-white h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-clock-rotate-left text-secondary me-2"></i>Recent Orders</h6>
+                <a href="{{ url_for('orders.index') }}" class="btn btn-link btn-sm text-decoration-none p-0">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="fs-7 text-uppercase text-muted">
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_orders %}
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('orders.show', order_id=order.id) }}" class="fw-semibold text-primary text-decoration-none">
+                                        {{ order.order_number }}
+                                    </a>
+                                </td>
+                                <td class="fw-medium text-dark">{{ order.customer.full_name }}</td>
+                                <td>
+                                    {% if order.order_status == 'Completed' %}
+                                        <span class="badge bg-success-subtle text-success rounded-pill">Completed</span>
+                                    {% elif order.order_status == 'Ready for Pickup' %}
+                                        <span class="badge bg-info-subtle text-info rounded-pill">Ready</span>
+                                    {% elif order.order_status == 'In Progress' %}
+                                        <span class="badge bg-warning-subtle text-warning rounded-pill">In Progress</span>
+                                    {% elif order.order_status == 'Cancelled' %}
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill">{{ order.order_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if order.payment_status == 'Paid' %}
+                                        <span class="badge bg-success text-white">Paid</span>
+                                    {% elif order.payment_status == 'Partial' %}
+                                        <span class="badge bg-warning text-dark">Partial</span>
+                                    {% else %}
+                                        <span class="badge bg-danger text-white">Unpaid</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end fw-bold text-dark">GH₵ {{ "%.2f"|format(order.total_amount) }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No recent orders found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js 4.x CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Revenue Trend Line Chart
+    const revLabels = {{ revenue_trend.labels | tojson }};
+    const revData = {{ revenue_trend.data | tojson }};
+
+    const ctxRev = document.getElementById('revenueTrendChart').getContext('2d');
+    new Chart(ctxRev, {
+        type: 'line',
+        data: {
+            labels: revLabels,
+            datasets: [{
+                label: 'Monthly Revenue (GH₵)',
+                data: revData,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' Revenue: GH₵ ' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f0f0f0' },
+                    ticks: {
+                        callback: function(value) { return 'GH₵ ' + value; }
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Order Status Doughnut Chart
+    const statusLabels = {{ order_status_dist.labels | tojson }};
+    const statusData = {{ order_status_dist.data | tojson }};
+
+    const ctxStatus = document.getElementById('orderStatusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: [
+                    '#ffc107', // Pending / In Progress
+                    '#0dcaf0', // Ready
+                    '#198754', // Completed
+                    '#6c757d', // Delivered
+                    '#dc3545'  // Cancelled
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, font: { size: 12 } }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // 3. Top Services Bar Chart
+    const serviceLabels = {{ top_services.labels | tojson }};
+    const serviceData = {{ top_services.data | tojson }};
+
+    const ctxServices = document.getElementById('topServicesChart').getContext('2d');
+    new Chart(ctxServices, {
+        type: 'bar',
+        data: {
+            labels: serviceLabels,
+            datasets: [{
+                label: 'Revenue (GH₵)',
+                data: serviceData,
+                backgroundColor: '#20c997',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' Total: GH₵ ' + context.parsed.x.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: '#f0f0f0' },
+                    ticks: {
+                        callback: function(value) { return 'GH₵ ' + value; }
+                    }
+                },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
