@@ -18,6 +18,14 @@
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
+    <script>
+        if (localStorage.getItem('kleanflow_sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
+            document.documentElement.classList.add('sidebar-collapsed');
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('sidebar-collapsed');
+            });
+        }
+    </script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -25,7 +33,7 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar-wrapper" id="sidebar">
         <div class="sidebar-header">
-            <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand">
+            <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand" title="KleanFlow">
                 <i class="fa-solid fa-soap text-primary me-2"></i>
                 <span class="fw-bold">Klean<span class="text-primary">Flow</span></span>
             </a>
@@ -33,58 +41,58 @@
         <div class="sidebar-body">
             <ul class="nav flex-column sidebar-nav">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard.index') }}" title="Dashboard">
                         <i class="fa-solid fa-chart-pie me-3"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'customers' %}active{% endif %}" href="{{ url_for('customers.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'customers' %}active{% endif %}" href="{{ url_for('customers.index') }}" title="Customers">
                         <i class="fa-solid fa-users me-3"></i>
                         <span>Customers</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'services' %}active{% endif %}" href="{{ url_for('services.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'services' %}active{% endif %}" href="{{ url_for('services.index') }}" title="Services">
                         <i class="fa-solid fa-shirt me-3"></i>
                         <span>Services</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'orders' %}active{% endif %}" href="{{ url_for('orders.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'orders' %}active{% endif %}" href="{{ url_for('orders.index') }}" title="Orders">
                         <i class="fa-solid fa-basket-shopping me-3"></i>
                         <span>Orders</span>
                     </a>
                 </li>
                 {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager', 'Cashier') %}
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'payments' %}active{% endif %}" href="{{ url_for('payments.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'payments' %}active{% endif %}" href="{{ url_for('payments.index') }}" title="Payments">
                         <i class="fa-solid fa-credit-card me-3"></i>
                         <span>Payments</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'receipts' %}active{% endif %}" href="{{ url_for('receipts.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'receipts' %}active{% endif %}" href="{{ url_for('receipts.index') }}" title="Receipts">
                         <i class="fa-solid fa-receipt me-3"></i>
                         <span>Receipts</span>
                     </a>
                 </li>
                 {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link disabled" href="#" title="Pickups">
                         <i class="fa-solid fa-truck-pickup me-3"></i>
                         <span>Pickups</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link disabled" href="#" title="Deliveries">
                         <i class="fa-solid fa-truck-fast me-3"></i>
                         <span>Deliveries</span>
                     </a>
                 </li>
                 {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'reports' %}active{% endif %}" href="{{ url_for('reports.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'reports' %}active{% endif %}" href="{{ url_for('reports.index') }}" title="Reports">
                         <i class="fa-solid fa-chart-line me-3"></i>
                         <span>Reports</span>
                     </a>
@@ -95,13 +103,13 @@
                     <small class="text-uppercase text-muted px-3 fw-semibold fs-7">Administration</small>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.blueprint == 'users' %}active{% endif %}" href="{{ url_for('users.index') }}">
+                    <a class="nav-link {% if request.blueprint == 'users' %}active{% endif %}" href="{{ url_for('users.index') }}" title="User Management">
                         <i class="fa-solid fa-user-gear me-3"></i>
                         <span>User Management</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a class="nav-link disabled" href="#" title="Settings">
                         <i class="fa-solid fa-sliders me-3"></i>
                         <span>Settings</span>
                     </a>
@@ -115,7 +123,7 @@
     <div class="main-wrapper" id="mainWrapper">
         <!-- Top Navbar -->
         <header class="navbar navbar-expand-lg top-navbar px-4">
-            <button class="btn btn-link text-dark p-0 me-3 d-lg-none" id="sidebarToggle">
+            <button class="btn btn-link text-dark p-0 me-3" id="sidebarToggle" title="Toggle Sidebar">
                 <i class="fa-solid fa-bars fs-5"></i>
             </button>
             <div class="navbar-title me-auto">

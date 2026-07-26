@@ -1,12 +1,22 @@
 // KleanFlow Main JavaScript
 document.addEventListener('DOMContentLoaded', function () {
-    // Sidebar toggle for mobile responsive layouts
+    // Sidebar toggle for desktop and mobile responsive layouts
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
 
+    // Restore desktop collapsed state
+    if (localStorage.getItem('kleanflow_sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
+        document.body.classList.add('sidebar-collapsed');
+    }
+
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
+            if (window.innerWidth < 992) {
+                sidebar.classList.toggle('show');
+            } else {
+                document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('kleanflow_sidebar_collapsed', document.body.classList.contains('sidebar-collapsed'));
+            }
         });
     }
 
