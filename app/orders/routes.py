@@ -144,3 +144,22 @@ def cancel(order_id):
     else:
         flash(message, "danger")
     return redirect(url_for('orders.show', order_id=order_id))
+
+@orders_bp.route('/<int:order_id>/delete', methods=['POST'])
+@roles_required('Administrator', 'Manager')
+def delete(order_id):
+    """Deletes an order permanently from system."""
+    from app.models import Order, OrderItem, Payment, Receipt
+    from app.extensions import db
+    order = Order.query.get_or_404(order_id)
+    ord_num = order.order_number
+    
+    Receipt.query.filter_by(order_id=order.id).delete()
+    Payment.query.filter_by(order_id=order.id).delete()
+    OrderItem.query.filter_by(order_id=order.id).delete()
+    
+    db.session.delete(order)
+    db.session.commit()
+    flash(f"Order #{ord_num} deleted successfully.", "success")
+    return redirect(url_for('orders.index'))
+

@@ -167,9 +167,19 @@
                                 {{ o.created_at.strftime('%b %d, %H:%M') if o.created_at else 'N/A' }}
                             </td>
                             <td class="text-end pe-4">
-                                <a href="{{ url_for('orders.show', order_id=o.id) }}" class="btn btn-sm btn-light border rounded-2" title="View Order Details">
-                                    <i class="fa-solid fa-eye text-primary"></i> View
-                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('orders.show', order_id=o.id) }}" class="btn btn-light border rounded-2" title="View Order Details">
+                                        <i class="fa-solid fa-eye text-primary"></i> View
+                                    </a>
+                                    {% if current_user.role in ('Administrator', 'Manager') %}
+                                    <form action="{{ url_for('orders.delete', order_id=o.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete order #{{ o.order_number }}?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-light border text-danger rounded-2" title="Delete Order">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
