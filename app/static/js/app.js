@@ -31,3 +31,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     });
 });
+
+// Global Password Visibility Toggle Helper
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn ? btn.querySelector('i') : null;
+    if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        if (icon) {
+            if (icon.classList.contains('bi')) {
+                icon.classList.toggle('bi-eye', !isPassword);
+                icon.classList.toggle('bi-eye-slash', isPassword);
+            } else {
+                icon.classList.toggle('fa-eye', !isPassword);
+                icon.classList.toggle('fa-eye-slash', isPassword);
+            }
+        }
+    }
+}

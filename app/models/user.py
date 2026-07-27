@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     phone_number = db.Column(db.String(20), unique=True, nullable=True, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default='Laundry Staff')
+    role = db.Column(db.String(50), nullable=False, default='Laundry Attendant')  # Manager, Laundry Attendant
     status = db.Column(db.String(20), nullable=False, default='Active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -44,12 +44,11 @@ class User(UserMixin, db.Model):
         """Returns True if user role is within specified roles."""
         return self.role in roles
 
-    def is_admin(self):
-        return self.role == 'Administrator'
-
     def is_manager(self):
-        return self.role in ['Administrator', 'Manager']
+        return self.role == 'Manager'
+
+    def is_admin(self):
+        return self.role == 'Manager'
 
     def __repr__(self):
         return f"<User id={self.id} email='{self.email}' role='{self.role}'>"
-

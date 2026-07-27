@@ -10,9 +10,6 @@ from flask_login import current_user
 def roles_required(*roles):
     """
     Decorator to restrict route access to users with specified role(s).
-
-    Args:
-        *roles: Variable length argument list of allowed role names.
     """
     def decorator(f):
         @wraps(f)
@@ -22,7 +19,7 @@ def roles_required(*roles):
                 return redirect(url_for('auth.login', next=request.url))
 
             if current_user.status != 'Active':
-                flash("Your account is inactive. Please contact an administrator.", "danger")
+                flash("Your account is inactive. Please contact a manager.", "danger")
                 return redirect(url_for('auth.login'))
 
             if current_user.role not in roles:
@@ -35,10 +32,10 @@ def roles_required(*roles):
 
 
 def admin_required(f):
-    """Decorator shortcut for Administrator-only routes."""
-    return roles_required('Administrator')(f)
+    """Decorator shortcut for Manager routes."""
+    return roles_required('Manager')(f)
 
 
 def manager_required(f):
-    """Decorator shortcut for Administrator and Manager routes."""
-    return roles_required('Administrator', 'Manager')(f)
+    """Decorator shortcut for Manager routes."""
+    return roles_required('Manager')(f)

@@ -9,7 +9,7 @@
         <h4 class="fw-bold mb-1">Employee &amp; Staff Accounts</h4>
         <p class="text-muted small mb-0">Manage system access roles, user permissions, and account statuses.</p>
     </div>
-    {% if current_user.has_role('Administrator') %}
+    {% if current_user.has_role('Manager') %}
     <div>
         <a href="{{ url_for('users.create') }}" class="btn btn-primary fw-semibold rounded-3">
             <i class="fa-solid fa-user-plus me-2"></i> Add New User
@@ -83,7 +83,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge {% if u.role == 'Administrator' %}bg-danger-subtle text-danger{% elif u.role == 'Manager' %}bg-primary-subtle text-primary{% else %}bg-secondary-subtle text-dark{% endif %} px-2 py-1 rounded-2">
+                                <span class="badge {% if u.role == 'Manager' %}bg-primary-subtle text-primary{% else %}bg-info-subtle text-info{% endif %} px-2 py-1 rounded-2">
                                     {{ u.role }}
                                 </span>
                             </td>
@@ -97,7 +97,7 @@
                             </td>
                             <td class="text-muted small">{{ u.created_at.strftime('%b %d, %Y') if u.created_at else 'N/A' }}</td>
                             <td class="text-end pe-4">
-                                {% if current_user.has_role('Administrator') %}
+                                {% if current_user.has_role('Manager') %}
                                 <div class="d-inline-flex gap-2">
                                     <a href="{{ url_for('users.edit', user_id=u.id) }}" class="btn btn-sm btn-light border rounded-2" title="Edit User">
                                         <i class="fa-solid fa-pen-to-square text-primary"></i>

@@ -92,7 +92,8 @@ def create_app(config_name=None):
     # Register CLI seed command
     @app.cli.command("seed-admin")
     def seed_admin():
-        """Seeds default administrator account."""
+        """Seeds default administrator account and initial services."""
+        db.create_all()
         admin_email = "admin@kleanflow.com"
         existing_admin = User.query.filter_by(email=admin_email).first()
         if not existing_admin:
@@ -110,4 +111,31 @@ def create_app(config_name=None):
         else:
             click.echo(f"Administrator account '{admin_email}' already exists.")
 
+        # Seed sample services
+        from app.models import Service, Setting
+        if not Setting.query.first():
+            s = Setting(
+                business_name='KleanFlow Laundry Services',
+                business_phone='0200000000',
+                business_email='info@kleanflow.com',
+                receipt_prefix='KF-RCP-',
+                currency='GHS',
+                tax_rate=0.00
+            )
+            db.session.add(s)
+
+        if not Service.query.first():
+            services = [
+                Service(service_name='Wash & Fold', category='Laundry', price=15.00, status='Active'),
+                Service(service_name='Wash & Iron', category='Laundry', price=25.00, status='Active'),
+                Service(service_name='Dry Cleaning (Suit)', category='Dry Cleaning', price=40.00, status='Active'),
+                Service(service_name='Bedding & Duvet', category='Specialty', price=35.00, status='Active'),
+            ]
+            for srv in services:
+                db.session.add(srv)
+            db.session.commit()
+            click.echo("Sample services and settings seeded.")
+
     return app
+
+

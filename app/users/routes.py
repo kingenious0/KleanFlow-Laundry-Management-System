@@ -12,7 +12,7 @@ users_bp = Blueprint('users', __name__, url_prefix='/users')
 
 
 @users_bp.route('/', methods=['GET'])
-@roles_required('Administrator', 'Manager')
+@roles_required('Manager')
 def index():
     """Renders user management dashboard table with search and pagination."""
     search_query = request.args.get('search', '').strip()
@@ -50,7 +50,7 @@ def create():
             'email': request.form.get('email', ''),
             'phone_number': request.form.get('phone_number', ''),
             'password': request.form.get('password', ''),
-            'role': request.form.get('role', 'Laundry Staff'),
+            'role': request.form.get('role', 'Laundry Attendant'),
             'status': request.form.get('status', 'Active')
         }
 

@@ -50,7 +50,12 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="password" class="form-label small fw-semibold text-muted">Initial Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password', this)" title="Show/Hide Password">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-12">
                             <div class="bg-light rounded-3 p-3 text-muted small">

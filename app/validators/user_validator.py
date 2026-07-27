@@ -7,11 +7,8 @@ from app.repositories.user_repository import UserRepository
 
 # Allowed roles in KleanFlow system
 VALID_ROLES = [
-    'Administrator',
     'Manager',
-    'Cashier',
-    'Laundry Staff',
-    'Delivery Staff'
+    'Laundry Attendant'
 ]
 
 # Allowed statuses
@@ -32,24 +29,11 @@ class UserValidator:
     @staticmethod
     def validate_password_strength(password):
         """
-        Validates password complexity requirements:
-        - At least 8 characters
-        - Includes uppercase letter
-        - Includes lowercase letter
-        - Includes number
-        - Includes special character (recommended/enforced)
+        Validates password complexity requirements.
         """
         errors = []
-        if not password or len(password) < 8:
-            errors.append("Password must be at least 8 characters long.")
-        if not re.search(r'[A-Z]', password or ''):
-            errors.append("Password must contain at least one uppercase letter.")
-        if not re.search(r'[a-z]', password or ''):
-            errors.append("Password must contain at least one lowercase letter.")
-        if not re.search(r'[0-9]', password or ''):
-            errors.append("Password must contain at least one number.")
-        if not re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>/?\\|`~]', password or ''):
-            errors.append("Password must contain at least one special character.")
+        if not password or len(password) < 6:
+            errors.append("Password must be at least 6 characters long.")
         return errors
 
     @staticmethod

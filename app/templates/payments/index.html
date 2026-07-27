@@ -12,7 +12,7 @@
     {% if current_user.has_role('Administrator', 'Manager', 'Cashier') %}
     <div>
         <a href="{{ url_for('payments.record') }}" class="btn btn-primary fw-semibold rounded-3">
-            <i class="fa-solid fa-hand-holding-dollar me-2"></i> Record Payment
+            <i class="fa-solid fa-money-bill-wave me-2"></i> Record Payment
         </a>
     </div>
     {% endif %}

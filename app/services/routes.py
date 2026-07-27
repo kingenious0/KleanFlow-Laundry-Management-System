@@ -41,7 +41,7 @@ def index():
 
 
 @services_bp.route('/create', methods=['GET', 'POST'])
-@roles_required('Administrator', 'Manager')
+@roles_required('Manager')
 def create():
     """Renders new laundry service form and handles creation."""
     categories = ServiceService.get_categories()
@@ -56,7 +56,6 @@ def create():
             'status': request.form.get('status', 'Active')
         }
 
-        # If custom category provided, use it
         if data['category'] == 'NEW' and data['custom_category']:
             data['category'] = data['custom_category']
 
@@ -73,7 +72,7 @@ def create():
 
 
 @services_bp.route('/<int:service_id>/edit', methods=['GET', 'POST'])
-@roles_required('Administrator', 'Manager')
+@roles_required('Manager')
 def edit(service_id):
     """Renders service edit form and handles updates."""
     target_service = ServiceService.get_service_by_id(service_id)
@@ -109,7 +108,7 @@ def edit(service_id):
 
 
 @services_bp.route('/<int:service_id>/toggle-status', methods=['POST'])
-@roles_required('Administrator', 'Manager')
+@roles_required('Manager')
 def toggle_status(service_id):
     """Toggles status of a laundry service (Active <-> Inactive)."""
     service, message = ServiceService.toggle_service_status(service_id)
@@ -121,7 +120,7 @@ def toggle_status(service_id):
 
 
 @services_bp.route('/<int:service_id>/delete', methods=['POST'])
-@roles_required('Administrator', 'Manager')
+@roles_required('Manager')
 def delete(service_id):
     """Performs soft delete on a laundry service."""
     success, message = ServiceService.soft_delete_service(service_id)

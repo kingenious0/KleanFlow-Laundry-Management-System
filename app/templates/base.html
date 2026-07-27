@@ -64,7 +64,6 @@
                         <span>Orders</span>
                     </a>
                 </li>
-                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager', 'Cashier') %}
                 <li class="nav-item">
                     <a class="nav-link {% if request.blueprint == 'payments' %}active{% endif %}" href="{{ url_for('payments.index') }}" title="Payments">
                         <i class="fa-solid fa-credit-card me-3"></i>
@@ -77,7 +76,6 @@
                         <span>Receipts</span>
                     </a>
                 </li>
-                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link disabled" href="#" title="Pickups">
                         <i class="fa-solid fa-truck-pickup me-3"></i>
@@ -90,15 +88,13 @@
                         <span>Deliveries</span>
                     </a>
                 </li>
-                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
+                {% if current_user.is_authenticated and current_user.has_role('Manager') %}
                 <li class="nav-item">
                     <a class="nav-link {% if request.blueprint == 'reports' %}active{% endif %}" href="{{ url_for('reports.index') }}" title="Reports">
                         <i class="fa-solid fa-chart-line me-3"></i>
                         <span>Reports</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if current_user.is_authenticated and current_user.has_role('Administrator', 'Manager') %}
                 <li class="nav-item mt-3">
                     <small class="text-uppercase text-muted px-3 fw-semibold fs-7">Administration</small>
                 </li>
@@ -106,12 +102,6 @@
                     <a class="nav-link {% if request.blueprint == 'users' %}active{% endif %}" href="{{ url_for('users.index') }}" title="User Management">
                         <i class="fa-solid fa-user-gear me-3"></i>
                         <span>User Management</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" title="Settings">
-                        <i class="fa-solid fa-sliders me-3"></i>
-                        <span>Settings</span>
                     </a>
                 </li>
                 {% endif %}
